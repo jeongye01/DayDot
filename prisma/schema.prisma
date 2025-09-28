@@ -1,15 +1,38 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-}
+// schema.prisma
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?    // 구글 로그인 프로필 이미지
+  entries   Entry[]
+  createdAt DateTime @default(now())
+}
+
+model Entry {
+  id        String   @id @default(cuid())
+  content   String   // 한 줄 일기
+  mood      Mood     // 기분 이모지
+  date      DateTime // 작성 날짜 (YYYY-MM-DD 단위)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Mood {
+  LOVE      // 😍
+  HAPPY     // 😊
+  NEUTRAL   // 😐
+  SAD       // 😞
+  ANGRY     // 😡
 }
