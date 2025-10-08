@@ -9,7 +9,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+        default: " ",
         secondary:
           "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
         destructive:
@@ -28,12 +28,16 @@ const badgeVariants = cva(
         lg: "rounded-lg",
         full: "rounded-full",
       },
+      color: {
+        white: "bg-white text-gray-900",
+      },
     },
 
     defaultVariants: {
       variant: "default",
       size: 1,
       radius: "sm",
+      color: "white",
     },
   },
 );

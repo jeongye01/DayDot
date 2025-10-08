@@ -1,7 +1,54 @@
 @import "tailwindcss";
-
+.bg-daydot-dots {
+  background-image:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(255, 236, 183, 0.35) 0%,
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 10% 30%,
+      rgba(186, 255, 205, 0.25) 0%,
+      transparent 15%
+    ),
+    radial-gradient(
+      circle at 90% 60%,
+      rgba(186, 207, 255, 0.3) 0%,
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 10% 75%,
+      rgba(186, 225, 255, 0.3) 0%,
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(255, 236, 183, 0.25) 0%,
+      transparent 10%
+    );
+  background-color: white;
+}
+.shadow-test {
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+  /* box-shadow:
+    rgba(17, 17, 26, 0.1) 0px 4px 16px,
+    rgba(17, 17, 26, 0.1) 0px 8px 24px,
+    rgba(17, 17, 26, 0.1) 0px 16px 56px; */
+  /* box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px; */
+  /* box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px; */
+}
+.shadow-test2 {
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 8px;
+  /* box-shadow:
+    rgba(17, 17, 26, 0.1) 0px 4px 16px,
+    rgba(17, 17, 26, 0.1) 0px 8px 24px,
+    rgba(17, 17, 26, 0.1) 0px 16px 56px; */
+  /* box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px; */
+  /* box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px; */
+}
 @theme {
-  --color-primary: #4c4ddc;
+  --color-primary: #0a98fe;
+  /* --color-primary: #5f33e1; */
   --color-secondary: #c8c8f4;
   --color-accent-red: #e74c3c;
   --color-accent-yellow: #ffd33c;

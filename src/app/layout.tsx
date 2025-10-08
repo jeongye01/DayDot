@@ -45,7 +45,7 @@ export default function RootLayout({
       url: "",
     },
     {
-      title: "Dots",
+      title: "History",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -89,53 +89,63 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex max-h-screen flex-col items-center bg-white text-gray-900">
-        <div className="flex h-screen w-full max-w-2xl flex-col border-x bg-white">
+        <div className="flex h-screen w-full max-w-[470px] flex-col border-x bg-gray-50">
           {/* Header */}
-          <header className="flex h-12 items-center justify-between border-b px-4 shadow-sm">
+          <header className="flex h-12 items-center justify-between px-4">
             <div className="flex items-end gap-1">
-              <span className="text-xl font-extrabold tracking-tight">
+              <span className="text-2xl font-extrabold tracking-tight">
                 DayDot
               </span>
               <div className="bg-primary mb-1.5 h-2 w-2 rounded-full" />
             </div>
             <div className="flex gap-2">
-              <Badge size={3} variant="outline" radius="full">
-                <span className="font-extrabold">Sun, 4 Jun</span>
+              {/* <Badge
+                size={3}
+                color="white"
+                radius="full"
+                className="shadow-test"
+              >
+                <span className="font-bold">Sun, 4 Jun</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="2"
+                  strokeWidth="1.5"
                   stroke="var(--color-primary)"
                   className="size-6"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"
                   />
                 </svg>
-              </Badge>
-              <Badge variant="outline" size={3} radius="full">
+              </Badge> */}
+              {/* <Badge
+                size={3}
+                color="white"
+                radius="full"
+                className="shadow-test"
+              >
                 <span className="font-extrabold">🔥 5</span>
-              </Badge>
+              </Badge> */}
             </div>
           </header>
 
           {/* Main */}
-          <main className="bg-primary flex-1 overflow-y-auto p-4">
+          <main className="relative flex-1 overflow-y-auto px-4 py-6">
             {children}
           </main>
 
           {/* Footer (Navigation Bar) */}
-          <footer className="flex h-14 items-center justify-around border-t bg-gray-50">
+          {/* <footer className="flex h-14 items-center justify-around border-t bg-gray-50">
             {FOOTER_MENU.map((menu) => (
               <button key={menu.title} className="flex flex-col items-center">
                 {menu.icon}
                 <span className="text-[12px] text-gray-600">{menu.title}</span>
               </button>
             ))}
-          </footer>
+          </footer> */}
         </div>
       </body>
     </html>
