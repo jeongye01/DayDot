@@ -46,6 +46,24 @@
   /* box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px; */
   /* box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px; */
 }
+.gradient {
+  background-image: linear-gradient(
+    330deg,
+    hsl(46deg 100% 62%) 0%,
+    hsl(45deg 87% 66%) 18%,
+    hsl(44deg 72% 69%) 26%,
+    hsl(44deg 55% 70%) 33%,
+    hsl(43deg 36% 71%) 39%,
+    hsl(45deg 17% 72%) 44%,
+    hsl(190deg 3% 72%) 50%,
+    hsl(214deg 22% 71%) 56%,
+    hsl(215deg 41% 70%) 61%,
+    hsl(214deg 59% 69%) 67%,
+    hsl(213deg 75% 66%) 74%,
+    hsl(210deg 88% 62%) 82%,
+    hsl(205deg 99% 52%) 100%
+  );
+}
 @theme {
   --color-primary: #0a98fe;
   /* --color-primary: #5f33e1; */
@@ -70,3 +88,27 @@
 텍스트 → text-neutral
 
 구분선 → border-neutral-gray */
+/* @keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1.5);
+  }
+  14% {
+    transform: scale(2);
+  }
+  28% {
+    transform: scale(1.5);
+  }
+  42% {
+    transform: scale(2);
+  }
+  70% {
+    transform: scale(1.5);
+  }
+}
+
+@layer utilities {
+  .animate-heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+} */

@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+
 import clsx from "clsx";
+import { DayButtonProps } from "react-day-picker";
+
+import Image from "next/image";
 
 const moodColors: Record<string, string> = {
-  LOVE: "bg-pink-300",
-  HAPPY: "bg-yellow-300",
+  HAPPY: "bg-pink-300",
+  GOOD: "bg-yellow-300",
   NEUTRAL: "bg-gray-300",
-  SAD: "bg-blue-300",
+  BAD: "bg-blue-300",
   ANGRY: "bg-red-300",
 };
 
@@ -33,8 +36,82 @@ export const MoodCalander = () => {
         mode="single"
         selected={selected}
         onSelect={setSelected}
+        components={{
+          DayButton: CustomDayButton,
+        }}
         className="w-full"
       />
+    </div>
+  );
+};
+
+const CustomDayButton = (props: DayButtonProps) => {
+  const { date, outside, dateLib } = props.day;
+
+  const normalize = (d: Date) => {
+    const n = new Date(d);
+    n.setHours(12, 0, 0, 0); // UTC 시차 보정
+    return n;
+  };
+
+  const today = normalize(new Date());
+  const target = normalize(date);
+
+  const isFuture = target.getTime() > today.getTime();
+  const isToday = target.getTime() === today.getTime();
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className={clsx(
+          "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100",
+          isToday && "!bg-primary text-white",
+        )}
+      >
+        {isFuture ? (
+          <></>
+        ) : isToday ? (
+          <div className="animate-heartbeat">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+              className="size-3"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </div>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+            className="size-3"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        )}
+      </div>
+      <span
+        className={clsx(
+          "text-[12px]",
+          outside && "text-gray-400",
+          isToday && "text-primary",
+        )}
+      >
+        {date.getDate()}
+      </span>
     </div>
   );
 };
