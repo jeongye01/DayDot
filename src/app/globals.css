@@ -1,4 +1,9 @@
 @import "tailwindcss";
+svg:focus,
+svg:focus-visible {
+  outline: none !important;
+}
+
 .bg-daydot-dots {
   background-image:
     radial-gradient(
