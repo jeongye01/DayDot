@@ -68,7 +68,7 @@ const CustomDayButton = (props: DayButtonProps) => {
         )}
       >
         {isFuture ? (
-          <></>
+          <Image alt="" src="icons/happy.svg" width={28} height={28} />
         ) : isToday ? (
           <div className="animate-heartbeat">
             <svg
@@ -110,6 +110,7 @@ const CustomDayButton = (props: DayButtonProps) => {
           isToday && "text-primary",
         )}
       >
+        {/* TODO: 무드 색 글자 옆에 넣기 */}
         {date.getDate()}
       </span>
     </div>
