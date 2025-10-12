@@ -133,7 +133,7 @@ export default function RootLayout({
           </header>
 
           {/* Main */}
-          <main className="relative flex-1 overflow-y-auto px-4 py-6">
+          <main className="relative flex-1 overflow-y-auto p-4">
             {children}
           </main>
 

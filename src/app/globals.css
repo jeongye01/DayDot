@@ -1,4 +1,9 @@
 @import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
 svg:focus,
 svg:focus-visible {
   outline: none !important;
