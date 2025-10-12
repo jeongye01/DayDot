@@ -1,6 +1,7 @@
 "use client"; // TODO: 컴포넌트 분리하면 지우기
 import { MoodCalander } from "@/components/daydot/MoodCalander";
 import { MoodChart } from "@/components/daydot/MoodChart";
+import { StreakCard } from "@/components/daydot/StreakCard";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import clsx from "clsx";
@@ -12,11 +13,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-4">
       <section>
-        <div className="shadow-test2 flex h-24 flex-col items-center justify-center rounded-lg bg-white p-2">
-          <div>
-            <span className="text-xl">지금까지 0일 연속 기록 중 🪵</span>
-          </div>
-        </div>
+        <StreakCard />
       </section>
       <section>
         <MoodCalander />
@@ -25,25 +22,6 @@ export default function Home() {
         <MoodChart />
       </section>
       <div className="absolute right-4 bottom-4 flex flex-col items-end gap-2">
-        {/* <Button
-          size="lg"
-          className="shadow-test2 bg-primary h-12 w-12 rounded-full"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-        </Button> */}
         <Button
           size="lg"
           className="shadow-test2 bg-primary h-12 w-12 rounded-full"

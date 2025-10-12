@@ -97,10 +97,11 @@ const CustomDayButton = (props: DayButtonProps) => {
 
   const isFuture = target.getTime() > today.getTime();
   const isToday = target.getTime() === today.getTime();
+  // TODO: 다이어로그 달력 하나에서 호출하도록 로직 수정
   return (
     <Dialog>
       <DialogTrigger
-        className="flex flex-col items-center"
+        className="flex w-fit flex-col items-center"
         onClick={() => console.log("click")}
       >
         <div
