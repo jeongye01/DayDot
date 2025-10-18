@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -98,38 +106,41 @@ export default function RootLayout({
               </span>
               <div className="bg-primary mb-1.5 h-2 w-2 rounded-full" />
             </div>
-            <div className="flex gap-2">
-              {/* <Badge
-                size={3}
-                color="white"
-                radius="full"
-                className="shadow-test"
-              >
-                <span className="font-bold">Sun, 4 Jun</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="var(--color-primary)"
-                  className="size-6"
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size="custom"
+                  variant="outline"
+                  className="h-7 border border-gray-400 p-2 text-gray-400"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"
-                  />
-                </svg>
-              </Badge> */}
-              {/* <Badge
-                size={3}
-                color="white"
-                radius="full"
-                className="shadow-test"
+                  로그인
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                className="flex w-fit flex-col items-center px-4 py-2"
               >
-                <span className="font-extrabold">🔥 5</span>
-              </Badge> */}
-            </div>
+                <div className="flex flex-col gap-1">
+                  <h1 className="text-[16px] font-bold">DayDot 로그인</h1>
+                  <p className="text-[12px] text-gray-500">
+                    매일의 점이 모여, 당신을 빛나게 할 거예요 ✨
+                  </p>
+                </div>
+                <Separator className="mt-2 mb-2" />
+                <button className="flex h-[41px] w-full cursor-pointer items-center justify-start rounded-full border !border-[#747775] !bg-white !text-[#1F1F1F]">
+                  <div>
+                    <Image
+                      alt=""
+                      src="icons/google.svg"
+                      width={40}
+                      height={40}
+                    />
+                  </div>
+                  <span>Google 계정으로 로그인</span>
+                </button>
+              </PopoverContent>
+            </Popover>
           </header>
 
           {/* Main */}
