@@ -1,49 +1,57 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { withAuth } from "@/lib/withAuth";
 
-const prisma = new PrismaClient();
+export const GET = withAuth(
+  async (session, req) => {
+    const url = new URL(req.url);
+    const year = parseInt(url.searchParams.get("year") || "0", 10);
+    const month = parseInt(url.searchParams.get("month") || "0", 10);
 
-// GET /api/entries?userId=xxx → 특정 유저의 모든 일기
-export async function GET(req: Request) {
-   try {
-      const { searchParams } = new URL(req.url);
-      const userId = searchParams.get('userId');
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
 
-      if (!userId) {
-         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-      }
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-      const entries = await prisma.entry.findMany({
-         where: { userId },
-         orderBy: { date: 'desc' },
-      });
-      return NextResponse.json(entries);
-   } catch {
-      return NextResponse.json({ error: 'Failed to fetch entries' }, { status: 500 });
-   }
-}
+    const now = new Date();
+    const targetYear = year || now.getFullYear();
+    const targetMonth = month || now.getMonth() + 1;
 
-// POST /api/entries → 특정 유저의 새 일기 작성
-export async function POST(req: Request) {
-   try {
-      const body = await req.json();
-      const { content, mood, userId } = body;
+    const startDate = new Date(targetYear, targetMonth - 1, 1);
+    const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59);
 
-      if (!mood || !userId) {
-         return NextResponse.json({ error: 'Missing mood or userId' }, { status: 400 });
-      }
+    const entries = await prisma.entry.findMany({
+      where: {
+        userId: user.id,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { date: "asc" },
+    });
 
-      const entry = await prisma.entry.create({
-         data: {
-            content: content ?? null,
-            mood,
-            date: new Date(),
-            userId,
-         },
-      });
+    return NextResponse.json(entries);
+  },
+  { requireOwnership: true },
+);
 
-      return NextResponse.json(entry);
-   } catch {
-      return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 });
-   }
-}
+export const POST = withAuth(async (session, req: Request) => {
+  const data = await req.json();
+  const { mood, content, date } = data;
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+  const entry = await prisma.entry.create({
+    data: {
+      mood,
+      content,
+      date: new Date(date),
+      userId: user!.id,
+    },
+  });
+  return NextResponse.json(entry);
+});

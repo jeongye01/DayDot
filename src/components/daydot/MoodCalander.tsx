@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -17,7 +16,7 @@ import { DayButtonProps } from "react-day-picker";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+
 import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
@@ -198,7 +197,7 @@ const CustomDayButton = (props: DayButtonProps) => {
               </RadioGroup>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="username-1">짧은 글</Label>
+              <Label htmlFor="username-1">짧은 기록</Label>
               <Textarea
                 id="username-1"
                 name="username"
