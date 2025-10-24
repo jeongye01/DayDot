@@ -32,7 +32,7 @@ export const DELETE = withAuth(
     await prisma.entry.delete({
       where: { id: params.id },
     });
-    return NextResponse.json({ message: "Deleted" });
+    return new NextResponse(null, { status: 204 });
   },
   { requireOwnership: true },
 );

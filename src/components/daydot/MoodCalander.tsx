@@ -19,6 +19,9 @@ import { Label } from "../ui/label";
 
 import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import { getEntryList } from "@/lib/queryFns";
 
 const moodColors: Record<string, string> = {
   HAPPY: "bg-pink-300",
@@ -64,7 +67,11 @@ export const MoodCalander = () => {
     const d = date.toISOString().split("T")[0];
     return entries.find((e) => e.date === d)?.mood ?? null;
   };
-
+  const { data } = useQuery({
+    queryKey: queryKeys.entries.list({}),
+    queryFn: () => getEntryList({}),
+  });
+  console.log(data);
   return (
     <div // TODO: Container 컴포넌트 만들기
       className="shadow-test2 flex flex-col items-center justify-center rounded-lg bg-white p-2"

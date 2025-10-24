@@ -1,0 +1,23 @@
+export interface Entry {
+  id: string;
+  userId: string;
+  mood: string;
+  content?: string;
+  date: string; // ISO string (ex: "2025-10-18T00:00:00Z")
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GetEntryListData = Entry[];
+
+export interface GetEntryListParams {
+  year?: number;
+  month?: number;
+}
+
+export type GetEntryData = Entry;
+export type GetEntryParams = Pick<Entry, "id">;
+
+export type PostEntryPayload = Pick<Entry, "mood" | "content" | "date">;
+
+export type PatchEntryPayload = Pick<Entry, "mood" | "content">;
