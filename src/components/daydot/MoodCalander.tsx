@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { getEntryList } from "@/lib/queryFns";
+import { Entry, MOOD } from "@/types/entries";
 
 const moodColors: Record<string, string> = {
   HAPPY: "bg-pink-300",
@@ -30,7 +31,17 @@ const moodColors: Record<string, string> = {
   BAD: "bg-blue-300",
   ANGRY: "bg-red-300",
 };
-
+const MOODS: Record<MOOD, { img: string }> = {
+  HAPPY: {
+    img: "icons/happy.svg",
+  },
+  GOOD: {
+    img: "icons/good.svg",
+  },
+  NEUTRAL: { img: "icons/neutral.svg" },
+  BAD: { img: "icons/bad.svg" },
+  ANGRY: { img: "icons/angry.svg" },
+};
 const FORM_MOODS = [
   {
     value: "HAPPY",
@@ -53,25 +64,19 @@ const FORM_MOODS = [
     img: "icons/angry.svg",
   },
 ];
+const getEntryForDate = (date: Date, entries: Entry[]) => {
+  const normalized = date.toISOString().split("T")[0];
+  return entries.find((e) => e.date.startsWith(normalized)) ?? null;
+};
 
 export const MoodCalander = () => {
   const [selected, setSelected] = useState<Date>();
-  const entries = [
-    { date: "2025-10-01", mood: "HAPPY" },
-    { date: "2025-10-02", mood: "LOVE" },
-    { date: "2025-10-03", mood: "SAD" },
-  ];
 
-  // 문자열 → Date 변환
-  const getMoodForDate = (date: Date) => {
-    const d = date.toISOString().split("T")[0];
-    return entries.find((e) => e.date === d)?.mood ?? null;
-  };
-  const { data } = useQuery({
+  const { data: entries = [] } = useQuery({
     queryKey: queryKeys.entries.list({}),
     queryFn: () => getEntryList({}),
   });
-  console.log(data);
+
   return (
     <div // TODO: Container 컴포넌트 만들기
       className="shadow-test2 flex flex-col items-center justify-center rounded-lg bg-white p-2"
@@ -81,7 +86,12 @@ export const MoodCalander = () => {
         selected={selected}
         onSelect={setSelected}
         components={{
-          DayButton: CustomDayButton,
+          DayButton: (dayProps) => (
+            <CustomDayButton
+              {...dayProps}
+              entry={getEntryForDate(dayProps.day.date, entries)}
+            />
+          ),
         }}
         className="w-full"
       />
@@ -89,8 +99,9 @@ export const MoodCalander = () => {
   );
 };
 
-const CustomDayButton = (props: DayButtonProps) => {
+const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
   const { date, outside, dateLib } = props.day;
+  const entry = props.entry;
 
   const normalize = (d: Date) => {
     const n = new Date(d);
@@ -109,6 +120,7 @@ const CustomDayButton = (props: DayButtonProps) => {
       <DialogTrigger
         className="flex w-fit flex-col items-center"
         onClick={() => console.log("click")}
+        disabled={isFuture}
       >
         <div
           className={clsx(
@@ -117,39 +129,54 @@ const CustomDayButton = (props: DayButtonProps) => {
           )}
         >
           {isFuture ? (
-            <Image alt="" src="icons/happy.svg" width={28} height={28} />
+            <></>
           ) : isToday ? (
             <div className="animate-heartbeat">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                className="size-3"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
+              {entry ? (
+                <Image
+                  alt=""
+                  src={MOODS[entry.mood].img}
+                  width={28}
+                  height={28}
                 />
-              </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="size-3"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              )}
             </div>
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              className="size-3"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
+            <>
+              {entry ? (
+                <Image alt="" src="icons/happy.svg" width={28} height={28} />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="size-3"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              )}
+            </>
           )}
         </div>
         <span

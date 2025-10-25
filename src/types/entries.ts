@@ -1,7 +1,7 @@
 export interface Entry {
   id: string;
   userId: string;
-  mood: string;
+  mood: MOOD;
   content?: string;
   date: string; // ISO string (ex: "2025-10-18T00:00:00Z")
   createdAt: string;
@@ -21,3 +21,6 @@ export type GetEntryParams = Pick<Entry, "id">;
 export type PostEntryPayload = Pick<Entry, "mood" | "content" | "date">;
 
 export type PatchEntryPayload = Pick<Entry, "mood" | "content">;
+
+export const MOODS = ["HAPPY", "GOOD", "NEUTRAL", "BAD", "ANGRY"] as const;
+export type MOOD = (typeof MOODS)[number];
