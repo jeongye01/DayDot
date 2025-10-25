@@ -21,19 +21,19 @@ import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { getEntryList } from "@/lib/queryFns";
+import { getEntry, getEntryList } from "@/lib/queryFns";
 import { Entry, MOOD } from "@/types/entries";
 
 const moodColors: Record<string, string> = {
-  HAPPY: "bg-pink-300",
+  LOVE: "bg-pink-300",
   GOOD: "bg-yellow-300",
   NEUTRAL: "bg-gray-300",
   BAD: "bg-blue-300",
   ANGRY: "bg-red-300",
 };
 const MOODS: Record<MOOD, { img: string }> = {
-  HAPPY: {
-    img: "icons/happy.svg",
+  LOVE: {
+    img: "icons/love.svg",
   },
   GOOD: {
     img: "icons/good.svg",
@@ -44,8 +44,8 @@ const MOODS: Record<MOOD, { img: string }> = {
 };
 const FORM_MOODS = [
   {
-    value: "HAPPY",
-    img: "icons/happy.svg",
+    value: "LOVE",
+    img: "icons/love.svg",
   },
   {
     value: "GOOD",
@@ -116,7 +116,7 @@ const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
   const isToday = target.getTime() === today.getTime();
 
   return (
-    <Dialog open>
+    <Dialog>
       <DialogTrigger
         className="flex w-fit flex-col items-center"
         disabled={isFuture}
@@ -159,7 +159,12 @@ const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
           ) : (
             <>
               {entry ? (
-                <Image alt="" src="icons/happy.svg" width={28} height={28} />
+                <Image
+                  alt=""
+                  src={MOODS[entry.mood].img}
+                  width={28}
+                  height={28}
+                />
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -190,8 +195,8 @@ const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
           {date.getDate()}
         </span>
       </DialogTrigger>
-      <EntryDetailDialog />
-      {/* {entry ? <EntryDetailDialog /> : <EntryCreateDialog />} */}
+
+      {entry ? <EntryDetailDialog id={entry.id} /> : <EntryCreateDialog />}
     </Dialog>
   );
 };
@@ -257,40 +262,54 @@ const EntryCreateDialog = () => {
     </DialogContent>
   );
 };
-const EntryDetailDialog = () => {
+const EntryDetailDialog = ({ id }: { id: Entry["id"] }) => {
+  const { data: entry } = useQuery({
+    queryKey: queryKeys.entries.detail({ id }),
+    queryFn: () => getEntry({ id }),
+  });
+
+  const date = new Date(entry?.date ?? "");
+  const formattedDate = date
+    .toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/-/g, ".");
+  const formattedTime = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>
           <div className="flex items-center gap-2">
-            <span className="text-[16px]">2025.10.12</span>
-            <Button
-              size={"custom"}
-              variant={"custom"}
-              className="bg-gray-300 p-1 text-[12px] text-white"
-              onClick={() => console.log("수정하기")}
-            >
-              수정
-            </Button>
+            <span className="text-[16px]">{formattedDate}</span>
           </div>
         </DialogTitle>
       </DialogHeader>
       <div className="">
         <div className="flex items-start gap-2">
           <div className="-mt-[6px] -ml-[8px]">
-            <Image alt="happy" width={48} height={48} src={"icons/happy.svg"} />
+            {entry && (
+              <Image
+                alt="happy"
+                width={48}
+                height={48}
+                src={MOODS[entry.mood]?.img}
+              />
+            )}
           </div>
           <div className="flex w-full flex-col gap-1">
             <div className="-mt-[2px] flex flex-col">
-              <span className="text-[12px] text-gray-500">07:24 PM</span>
-              <span className="text-[12px] font-bold">HAPPY</span>
+              <span className="text-[12px] text-gray-500">{formattedTime}</span>
+              <span className="text-[12px] font-bold">{entry?.mood}</span>
             </div>
-            <Textarea
-              id="username-1"
-              name="username"
-              defaultValue="@peduarte"
-              className="resize-none"
-            />
+            <div className="h-20 w-full rounded-sm border p-2 text-sm">
+              {entry?.content}
+            </div>
           </div>
         </div>
       </div>
