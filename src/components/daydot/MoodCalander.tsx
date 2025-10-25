@@ -64,6 +64,12 @@ const FORM_MOODS = [
     img: "icons/angry.svg",
   },
 ];
+const normalize = (d: Date) => {
+  const n = new Date(d);
+  n.setHours(12, 0, 0, 0); // UTC 시차 보정
+  return n;
+};
+
 const getEntryForDate = (date: Date, entries: Entry[]) => {
   const normalized = date.toISOString().split("T")[0];
   return entries.find((e) => e.date.startsWith(normalized)) ?? null;
@@ -100,27 +106,21 @@ export const MoodCalander = () => {
 };
 
 const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
-  const { date, outside, dateLib } = props.day;
+  const { date, outside } = props.day;
   const entry = props.entry;
-
-  const normalize = (d: Date) => {
-    const n = new Date(d);
-    n.setHours(12, 0, 0, 0); // UTC 시차 보정
-    return n;
-  };
 
   const today = normalize(new Date());
   const target = normalize(date);
 
   const isFuture = target.getTime() > today.getTime();
   const isToday = target.getTime() === today.getTime();
-  // TODO: 다이어로그 달력 하나에서 호출하도록 로직 수정
+
   return (
-    <Dialog>
+    <Dialog open>
       <DialogTrigger
         className="flex w-fit flex-col items-center"
-        onClick={() => console.log("click")}
         disabled={isFuture}
+        onClick={() => console.log(isFuture ? "isFuture" : "register")}
       >
         <div
           className={clsx(
@@ -190,64 +190,110 @@ const CustomDayButton = (props: DayButtonProps & { entry: Entry | null }) => {
           {date.getDate()}
         </span>
       </DialogTrigger>
-
-      <form>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              <span className="text-[16px]">2025.10.12 기록</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 mb-4 grid gap-5">
-            <div className="grid gap-3">
-              <Label htmlFor="name-1">감정</Label>
-              <RadioGroup className="flex justify-between gap-4 px-5">
-                {FORM_MOODS.map((mood) => (
-                  <div
-                    key={mood.value}
-                    className="flex w-12 flex-col items-center"
-                  >
-                    <RadioGroupItem
-                      value={mood.value}
-                      id={mood.value}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor="happy"
-                      className="flex cursor-pointer flex-col items-center !gap-0 text-sm peer-data-[state=checked]:text-yellow-500"
-                    >
-                      <Image
-                        alt={mood.value}
-                        width={28}
-                        height={28}
-                        src={mood.img}
-                      />
-                      <span className="text-[12px] text-gray-500">
-                        {mood.value}
-                      </span>
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="username-1">짧은 기록</Label>
-              <Textarea
-                id="username-1"
-                name="username"
-                defaultValue="@peduarte"
-                className="resize-none"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">취소</Button>
-            </DialogClose>
-            <Button type="submit">저장</Button>
-          </DialogFooter>
-        </DialogContent>
-      </form>
+      <EntryDetailDialog />
+      {/* {entry ? <EntryDetailDialog /> : <EntryCreateDialog />} */}
     </Dialog>
+  );
+};
+
+const EntryCreateDialog = () => {
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <form>
+        <DialogHeader>
+          <DialogTitle>
+            <span className="text-[16px]">2025.10.12 기록</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="mt-4 mb-4 grid gap-5">
+          <div className="grid gap-3">
+            <Label htmlFor="name-1">감정</Label>
+            <RadioGroup className="flex justify-between gap-4 px-5">
+              {FORM_MOODS.map((mood) => (
+                <div
+                  key={mood.value}
+                  className="flex w-12 flex-col items-center"
+                >
+                  <RadioGroupItem
+                    value={mood.value}
+                    id={mood.value}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor="happy"
+                    className="flex cursor-pointer flex-col items-center !gap-0 text-sm peer-data-[state=checked]:text-yellow-500"
+                  >
+                    <Image
+                      alt={mood.value}
+                      width={28}
+                      height={28}
+                      src={mood.img}
+                    />
+                    <span className="text-[12px] text-gray-500">
+                      {mood.value}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="username-1">짧은 기록</Label>
+            <Textarea
+              id="username-1"
+              name="username"
+              defaultValue="@peduarte"
+              className="resize-none"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">취소</Button>
+          </DialogClose>
+          <Button type="submit">저장</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+};
+const EntryDetailDialog = () => {
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>
+          <div className="flex items-center gap-2">
+            <span className="text-[16px]">2025.10.12</span>
+            <Button
+              size={"custom"}
+              variant={"custom"}
+              className="bg-gray-300 p-1 text-[12px] text-white"
+              onClick={() => console.log("수정하기")}
+            >
+              수정
+            </Button>
+          </div>
+        </DialogTitle>
+      </DialogHeader>
+      <div className="">
+        <div className="flex items-start gap-2">
+          <div className="-mt-[6px] -ml-[8px]">
+            <Image alt="happy" width={48} height={48} src={"icons/happy.svg"} />
+          </div>
+          <div className="flex w-full flex-col gap-1">
+            <div className="-mt-[2px] flex flex-col">
+              <span className="text-[12px] text-gray-500">07:24 PM</span>
+              <span className="text-[12px] font-bold">HAPPY</span>
+            </div>
+            <Textarea
+              id="username-1"
+              name="username"
+              defaultValue="@peduarte"
+              className="resize-none"
+            />
+          </div>
+        </div>
+      </div>
+    </DialogContent>
   );
 };
