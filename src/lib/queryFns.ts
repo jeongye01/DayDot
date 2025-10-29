@@ -43,7 +43,7 @@ export const patchEntry = async (
 };
 // ❌ 일기 삭제
 export const deleteEntry = async (id: Entry["id"]) => {
-  const { data } = await api.delete(`/api/entries/${id}`);
+  const { data } = await api.delete(`/entries/${id}`);
   return data;
 };
 

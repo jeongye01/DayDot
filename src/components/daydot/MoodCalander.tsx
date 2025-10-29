@@ -31,7 +31,12 @@ import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { getEntry, getEntryList, patchEntry } from "@/lib/queryFns";
+import {
+  deleteEntry,
+  getEntry,
+  getEntryList,
+  patchEntry,
+} from "@/lib/queryFns";
 import { Entry, MOOD, PatchEntryPayload } from "@/types/entries";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
@@ -268,7 +273,13 @@ const EntryCreateDialog = () => {
     </DialogContent>
   );
 };
-const EntryDetailDialog = ({ id }: { id: Entry["id"] }) => {
+const EntryDetailDialog = ({
+  id,
+  onClose,
+}: {
+  id: Entry["id"];
+  onClose: () => void;
+}) => {
   const {
     data: entry,
     isSuccess,
@@ -298,7 +309,18 @@ const EntryDetailDialog = ({ id }: { id: Entry["id"] }) => {
       console.error("❌ 수정 실패:", error);
     },
   });
-
+  const { mutate: mutateDelete } = useMutation({
+    mutationFn: () => deleteEntry(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.list({ year: 2025, month: 10 }),
+      });
+      queryClient.removeQueries({
+        queryKey: queryKeys.entries.detail({ id }),
+      });
+      onClose(); // ✅ 모달 닫음
+    },
+  });
   const date = new Date(entry?.date ?? "");
   const formattedDate = date
     .toLocaleDateString("ko-KR", {
@@ -376,7 +398,7 @@ const EntryDetailDialog = ({ id }: { id: Entry["id"] }) => {
               >
                 <DropdownMenuItem
                   className="text-accent-red flex items-center gap-1 py-1 text-[12px]"
-                  onClick={() => console.log("삭제")}
+                  onClick={() => mutateDelete()}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
