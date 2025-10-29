@@ -16,6 +16,7 @@ export const UserProfile = () => {
   return (
     <>
       {session ? (
+        // TODO: dropdown으로 바꾸기
         <Popover>
           <PopoverTrigger asChild>
             <button className="cursor-pointer">
@@ -63,20 +64,6 @@ export const UserProfile = () => {
               className="cursor-pointer text-sm text-gray-600"
             >
               <div className="flex items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  className="size-4 rotate-90"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
-                  />
-                </svg>
                 <span>로그아웃</span>
                 {/* // 이거 로그아웃하고 나서 토스트로 뜨면 좋을듯 */}
                 {/* <p className="mt-2 text-[11px] text-gray-400">

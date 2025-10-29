@@ -19,7 +19,6 @@ const moodColors: Record<string, RGB> = {
 };
 const MoodTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (!active || !payload || !payload.length) return null;
-
   const { mood, count } = payload[0].payload;
   const color = `rgb(${moodColors[mood].join(",")})`;
 
