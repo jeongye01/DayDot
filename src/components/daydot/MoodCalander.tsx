@@ -36,8 +36,14 @@ import {
   getEntry,
   getEntryList,
   patchEntry,
+  postEntry,
 } from "@/lib/queryFns";
-import { Entry, MOOD, PatchEntryPayload } from "@/types/entries";
+import {
+  Entry,
+  MOOD,
+  PatchEntryPayload,
+  PostEntryPayload,
+} from "@/types/entries";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
 const moodColors: Record<string, string> = {
@@ -221,20 +227,72 @@ const CustomDayButton = ({
     </DialogTrigger>
   );
 };
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day}`;
+};
+const EntryCreateDialog = ({
+  date,
+  onClose,
+}: {
+  date: Date;
+  onClose: () => void;
+}) => {
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: PostEntryPayload) => postEntry(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.list({
+          year: 2025,
+          month: 10,
+          // year: date.getFullYear(),
+          // month: date.getMonth() + 1,
+        }),
+      });
 
-const EntryCreateDialog = () => {
+      onClose?.();
+    },
+    onError: (error) => {
+      console.error("❌ 일기 등록 실패:", error);
+    },
+  });
+
+  const queryClient = useQueryClient();
+  const [selectedMood, setSelectedMood] = useState<MOOD>("LOVE");
+  const [keyword, setKeyword] = useState("");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    mutate({
+      mood: selectedMood,
+      content: keyword,
+      date: date.toISOString(),
+    });
+  };
   return (
     <DialogContent className="sm:max-w-[425px]">
-      <form>
+      <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>
-            <span className="text-[16px]">2025.10.12 기록</span>
+            <span className="text-[16px]">
+              {formatDate(date.toString())} 기록
+            </span>
           </DialogTitle>
         </DialogHeader>
-        <div className="mt-4 mb-4 grid gap-5">
-          <div className="grid gap-3">
+        <div className="my-4 flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             <Label htmlFor="name-1">감정</Label>
-            <RadioGroup className="flex justify-between gap-4 px-5">
+            <RadioGroup
+              value={selectedMood}
+              onValueChange={(v) => {
+                console.log(v);
+                setSelectedMood(v);
+              }}
+              className="flex justify-center gap-6"
+            >
               {Object.entries(MOODS).map(([mood, { img }]) => (
                 <div key={mood} className="flex w-12 flex-col items-center">
                   <RadioGroupItem
@@ -242,23 +300,34 @@ const EntryCreateDialog = () => {
                     id={mood}
                     className="peer sr-only"
                   />
-                  <Label
-                    htmlFor="happy"
-                    className="flex cursor-pointer flex-col items-center !gap-0 text-sm peer-data-[state=checked]:text-yellow-500"
+                  <label
+                    htmlFor={mood}
+                    className="flex cursor-pointer flex-col items-center"
                   >
                     <Image alt={mood} width={28} height={28} src={img} />
-                    <span className="text-[12px] text-gray-500">{mood}</span>
-                  </Label>
+                    <span
+                      className={clsx(
+                        "text-[12px]",
+                        selectedMood === mood
+                          ? "text-gray-900"
+                          : "text-gray-300",
+                      )}
+                    >
+                      {mood}
+                    </span>
+                  </label>
                 </div>
               ))}
             </RadioGroup>
           </div>
           <div className="grid gap-3">
-            <Label htmlFor="username-1">짧은 기록</Label>
+            <Label htmlFor="content">짧은 기록</Label>
             <Textarea
-              id="username-1"
-              name="username"
-              defaultValue="@peduarte"
+              id="content"
+              name="content"
+              value={keyword}
+              placeholder="오늘 하루는 어땠나요?"
+              onChange={(e) => setKeyword(e.target.value)}
               className="resize-none"
             />
           </div>
@@ -267,7 +336,9 @@ const EntryCreateDialog = () => {
           <DialogClose asChild>
             <Button variant="outline">취소</Button>
           </DialogClose>
-          <Button type="submit">저장</Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "저장 중..." : "저장"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>
@@ -322,13 +393,7 @@ const EntryDetailDialog = ({
     },
   });
   const date = new Date(entry?.date ?? "");
-  const formattedDate = date
-    .toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-    .replace(/-/g, ".");
+
   const [selectedMood, setSelectedMood] = useState<MOOD>();
   const [keyword, setKeyword] = useState("");
   const debouncedKeyword = useDebounce(keyword, 400);
@@ -368,7 +433,7 @@ const EntryDetailDialog = ({
       <DialogHeader>
         <DialogTitle>
           <div className="flex items-center gap-3">
-            <span className="text-[16px]">{formattedDate}</span>
+            <span className="text-[16px]">{formatDate(date.toString())}</span>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button
