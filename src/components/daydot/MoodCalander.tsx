@@ -81,8 +81,8 @@ export const MoodCalander = () => {
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: entries = [] } = useQuery({
-    queryKey: queryKeys.entries.list({ year: 2025, month: 10 }),
-    queryFn: () => getEntryList({ year: 2025, month: 10 }),
+    queryKey: queryKeys.entries.list({ year: 2025, month: 11 }),
+    queryFn: () => getEntryList({ year: 2025, month: 11 }),
   });
   const handleDayClick = (date: Date) => {
     const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
@@ -346,11 +346,7 @@ const EntryDetailDialog = ({
   id: Entry["id"];
   onClose: () => void;
 }) => {
-  const {
-    data: entry,
-    isSuccess,
-    refetch,
-  } = useQuery({
+  const { data: entry, isSuccess } = useQuery({
     queryKey: queryKeys.entries.detail({ id }),
     queryFn: () => getEntry({ id }),
     staleTime: 0, // 항상 최신
@@ -368,7 +364,7 @@ const EntryDetailDialog = ({
     }) => patchEntry(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.entries.list({ year: 2025, month: 10 }),
+        queryKey: queryKeys.entries.all,
       });
     },
     onError: (error) => {
@@ -378,9 +374,6 @@ const EntryDetailDialog = ({
   const { mutate: mutateDelete } = useMutation({
     mutationFn: () => deleteEntry(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.entries.list({ year: 2025, month: 10 }),
-      });
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
       });

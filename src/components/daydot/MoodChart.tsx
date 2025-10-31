@@ -1,3 +1,8 @@
+import { getStats } from "@/lib/queryFns";
+import { queryKeys } from "@/lib/queryKeys";
+import { MOOD } from "@/types/entries";
+
+import { useQuery } from "@tanstack/react-query";
 import {
   Area,
   AreaChart,
@@ -10,8 +15,8 @@ import {
 
 type RGB = [number, number, number];
 
-const moodColors: Record<string, RGB> = {
-  HAPPY: [25, 185, 179],
+const moodColors: Record<MOOD, RGB> = {
+  LOVE: [25, 185, 179],
   GOOD: [106, 192, 73],
   NEUTRAL: [244, 203, 57],
   BAD: [218, 104, 13],
@@ -43,30 +48,37 @@ const MoodTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     </div>
   );
 };
-const getWeightedColor = (data: { mood: string; count: number }[]) => {
-  const total = data.reduce((sum, d) => sum + d.count, 0);
+const getWeightedColor = (data?: Record<MOOD, number>) => {
+  if (!data) return "";
+  const total = Object.values(data).reduce((sum, count) => sum + count, 0);
+  if (total === 0) return "rgb(200, 200, 200)"; // 기본값 (데이터 없을 때)
+
   const mixed = [0, 0, 0];
-  data.forEach((d) => {
-    const weight = d.count / total;
-    const color = moodColors[d.mood];
+
+  Object.entries(data).forEach(([mood, count]) => {
+    const weight = count / total;
+    const color = moodColors[mood as MOOD]; // 예: [255, 100, 50]
     mixed[0] += color[0] * weight;
     mixed[1] += color[1] * weight;
     mixed[2] += color[2] * weight;
   });
+
   return `rgb(${mixed.map(Math.round).join(",")})`;
 };
 
-const moodData = [
-  { mood: "HAPPY", count: 10, index: 0 },
-  { mood: "GOOD", count: 10, index: 1 },
-  { mood: "NEUTRAL", count: 10, index: 2 },
-  { mood: "BAD", count: 1, index: 3 },
-  { mood: "ANGRY", count: 4, index: 4 },
-];
-
 export const MoodChart = () => {
-  const waveColor = getWeightedColor(moodData);
-
+  const { data: statData } = useQuery({
+    queryKey: queryKeys.entries.streak(),
+    queryFn: () => getStats(),
+  });
+  const waveColor = getWeightedColor(statData?.stats);
+  const moodData = [
+    { mood: "LOVE", count: statData?.stats?.["LOVE"] ?? 0, index: 0 },
+    { mood: "GOOD", count: statData?.stats?.["GOOD"] ?? 0, index: 1 },
+    { mood: "NEUTRAL", count: statData?.stats?.["NEUTRAL"] ?? 0, index: 2 },
+    { mood: "BAD", count: statData?.stats?.["BAD"] ?? 0, index: 3 },
+    { mood: "ANGRY", count: statData?.stats?.["ANGRY"] ?? 0, index: 4 },
+  ];
   return (
     <div className="shadow-test2 relative flex h-50 flex-col items-center justify-center gap-2 overflow-hidden rounded-lg bg-white p-2">
       <div className="![&_*:focus-visible]:outline-none flex h-64 w-full flex-col items-center justify-center outline-none focus:outline-none">

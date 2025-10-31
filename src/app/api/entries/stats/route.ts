@@ -1,60 +1,59 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { withAuth } from "@/lib/withAuth";
 
-const prisma = new PrismaClient();
+export const GET = withAuth(async (session) => {
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
 
-export async function POST(req: Request) {
-   try {
-      const body = await req.json();
-      const { userId } = body;
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
 
-      if (!userId) {
-         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-      }
+  // 이번 달 1일 ~ 다음 달 1일 범위
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-      const today = new Date();
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(today.getDate() - 6);
+  const entries = await prisma.entry.findMany({
+    where: {
+      userId: user.id,
+      date: {
+        gte: startOfMonth,
+        lt: startOfNextMonth,
+      },
+    },
+    select: { mood: true },
+  });
 
-      const entries = await prisma.entry.findMany({
-         where: { userId, date: { gte: sevenDaysAgo, lte: today } },
-         orderBy: { date: 'asc' },
-      });
+  if (entries.length === 0) {
+    return NextResponse.json({
+      summaryMonth: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+      total: 0,
+      stats: { LOVE: 0, GOOD: 0, NEUTRAL: 0, BAD: 0, ANGRY: 0 },
+      mostFrequentMood: null,
+    });
+  }
 
-      // streak 계산
-      let streak = 0;
-      let currentStreak = 0;
-      let prevDate: string | null = null;
+  // 감정 카운트 계산
+  const stats = entries.reduce(
+    (acc, e) => {
+      acc[e.mood] = (acc[e.mood] || 0) + 1;
+      return acc;
+    },
+    { LOVE: 0, GOOD: 0, NEUTRAL: 0, BAD: 0, ANGRY: 0 },
+  );
 
-      entries.forEach(entry => {
-         const entryDate = entry.date.toISOString().split('T')[0];
-         if (prevDate) {
-            const prev = new Date(prevDate);
-            const curr = new Date(entryDate);
-            const diff = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
-            if (diff === 1) currentStreak += 1;
-            else currentStreak = 1;
-         } else {
-            currentStreak = 1;
-         }
-         prevDate = entryDate;
-         streak = Math.max(streak, currentStreak);
-      });
+  // 가장 많이 나온 감정
+  const mostFrequentMood = Object.entries(stats).reduce((a, b) =>
+    b[1] > a[1] ? b : a,
+  )[0];
 
-      // mood 통계
-      const moodCount: Record<string, number> = {};
-      entries.forEach(e => {
-         moodCount[e.mood] = (moodCount[e.mood] || 0) + 1;
-      });
-      const mostFrequentMood = Object.entries(moodCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
-
-      return NextResponse.json({
-         userId,
-         streak,
-         totalDays: new Set(entries.map(e => e.date.toISOString().split('T')[0])).size,
-         mostFrequentMood,
-      });
-   } catch {
-      return NextResponse.json({ error: 'Failed to calculate stats' }, { status: 500 });
-   }
-}
+  return NextResponse.json({
+    summaryMonth: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+    total: entries.length,
+    stats,
+    mostFrequentMood,
+  });
+});

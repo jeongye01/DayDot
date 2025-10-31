@@ -33,3 +33,16 @@ export interface GetStreakData {
   currentStreak: number;
   maxStreak: number;
 }
+
+export interface GetStatsData {
+  summaryMonth: string;
+  total: number;
+  stats: {
+    LOVE: number;
+    GOOD: number;
+    NEUTRAL: number;
+    BAD: number;
+    ANGRY: number;
+  };
+  mostFrequentMood: MOOD;
+}
