@@ -6,6 +6,7 @@ import {
   GetEntryListParams,
   GetEntryParams,
   GetHasWrittenTodayData,
+  GetStreakData,
   PatchEntryPayload,
   PostEntryPayload,
 } from "@/types/entries";
@@ -53,8 +54,7 @@ export const getHasWrittenToday = async (): Promise<GetHasWrittenTodayData> => {
   return data;
 };
 
-// // 👤 유저 프로필
-// export const fetchUserProfile = async (id: string) => {
-//   const { data } = await api.get(`/api/users/${id}`);
-//   return data;
-// };
+export const getStreak = async (): Promise<GetStreakData> => {
+  const { data } = await api.get(`/entries/streak`);
+  return data;
+};

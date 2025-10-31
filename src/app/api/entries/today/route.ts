@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { withAuth } from "@/lib/withAuth";
 
 export const GET = withAuth(async (session, req, { params }) => {

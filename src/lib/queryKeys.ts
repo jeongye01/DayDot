@@ -8,6 +8,7 @@ export const queryKeys = {
     detail: ({ id }: GetEntryParams) =>
       [...queryKeys.entries.all, "detail", id] as const,
     today: () => [...queryKeys.entries.all, "today"] as const,
+    streak: () => [...queryKeys.entries.all, "streak"] as const,
   },
 
   //   user: {

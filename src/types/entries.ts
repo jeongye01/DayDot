@@ -28,3 +28,8 @@ export type MOOD = (typeof MOODS)[number];
 export interface GetHasWrittenTodayData {
   hasWrittenToday: boolean;
 }
+
+export interface GetStreakData {
+  currentStreak: number;
+  maxStreak: number;
+}
