@@ -245,12 +245,7 @@ const EntryCreateDialog = ({
     mutationFn: (payload: PostEntryPayload) => postEntry(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.entries.list({
-          year: 2025,
-          month: 10,
-          // year: date.getFullYear(),
-          // month: date.getMonth() + 1,
-        }),
+        queryKey: queryKeys.entries.all,
       });
 
       onClose?.();
@@ -261,7 +256,7 @@ const EntryCreateDialog = ({
   });
 
   const queryClient = useQueryClient();
-  const [selectedMood, setSelectedMood] = useState<MOOD>("LOVE");
+  const [selectedMood, setSelectedMood] = useState<MOOD>();
   const [keyword, setKeyword] = useState("");
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,8 +381,8 @@ const EntryDetailDialog = ({
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.list({ year: 2025, month: 10 }),
       });
-      queryClient.removeQueries({
-        queryKey: queryKeys.entries.detail({ id }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.all,
       });
       onClose(); // ✅ 모달 닫음
     },

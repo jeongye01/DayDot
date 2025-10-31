@@ -24,3 +24,7 @@ export type PatchEntryPayload = Pick<Entry, "mood" | "content">;
 
 export const MOODS = ["LOVE", "GOOD", "NEUTRAL", "BAD", "ANGRY"] as const;
 export type MOOD = (typeof MOODS)[number];
+
+export interface GetHasWrittenTodayData {
+  hasWrittenToday: boolean;
+}

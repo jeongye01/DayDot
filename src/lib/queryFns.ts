@@ -5,6 +5,7 @@ import {
   GetEntryListData,
   GetEntryListParams,
   GetEntryParams,
+  GetHasWrittenTodayData,
   PatchEntryPayload,
   PostEntryPayload,
 } from "@/types/entries";
@@ -44,6 +45,11 @@ export const patchEntry = async (
 // ❌ 일기 삭제
 export const deleteEntry = async (id: Entry["id"]) => {
   const { data } = await api.delete(`/entries/${id}`);
+  return data;
+};
+
+export const getHasWrittenToday = async (): Promise<GetHasWrittenTodayData> => {
+  const { data } = await api.get(`/entries/today`);
   return data;
 };
 
