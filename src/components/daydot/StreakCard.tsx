@@ -1,3 +1,6 @@
+import { getHasWrittenToday, getStreak } from "@/lib/queryFns";
+import { queryKeys } from "@/lib/queryKeys";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 interface DayStreakCardProps {
@@ -13,12 +16,16 @@ const getTimeOfDayIcon = () => {
     return `🌙`;
   }
 };
-export const StreakCard = ({
-  current,
-  longest,
-  isTodayRecorded,
-}: DayStreakCardProps) => {
+export const StreakCard = () => {
   const [todayProgress, setTodayProgress] = useState(0);
+  const { data: hasWrittenTodayData } = useQuery({
+    queryKey: queryKeys.entries.today(),
+    queryFn: getHasWrittenToday,
+  });
+  const { data: streakData } = useQuery({
+    queryKey: queryKeys.entries.streak(),
+    queryFn: () => getStreak(),
+  });
 
   // 🌞 오늘이 얼마나 지났는지 계산
   useEffect(() => {
@@ -49,7 +56,7 @@ export const StreakCard = ({
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-gray-800">
-          🔥 {current}일 연속 기록 중
+          🔥 {streakData?.currentStreak}일 연속 기록 중
         </p>
         <span className="text-xs text-gray-500">
           하루의 {todayProgress}%쯤 왔어요. {getTimeOfDayIcon()}
@@ -66,8 +73,8 @@ export const StreakCard = ({
 
       {/* 상태 문구 */}
       <p className="mt-1 text-xs text-gray-500">
-        최장 기록 {longest}일 • 오늘은{" "}
-        {isTodayRecorded ? (
+        최장 연속 기록 {streakData?.maxStreak}일 • 오늘은{" "}
+        {hasWrittenTodayData?.hasWrittenToday ? (
           <span className="text-primary font-medium">기록 완료</span>
         ) : (
           <span className="font-medium text-gray-900">아직 안 했어요</span>
