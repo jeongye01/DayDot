@@ -42,7 +42,7 @@ model Entry {
   id        String   @id @default(cuid())
   content   String?  
   mood      Mood 
-  date      DateTime // UTC
+  date      string // UTC
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime @default(now())

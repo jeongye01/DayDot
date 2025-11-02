@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
-
+// TODO: 성능 개선 고민 필요
 export const GET = withAuth(async (session, req, { params }) => {
   // TODO: 반복 로직 없애기
 
@@ -43,20 +43,31 @@ export const GET = withAuth(async (session, req, { params }) => {
       currentStreak = 1;
     }
   }
-
+  const now = new Date();
+  const utcMidnight = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
   // ✅ 어제 기록이 있으면 streak 유지
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
+  const yesterdayUtc = new Date(utcMidnight);
+  yesterdayUtc.setUTCDate(utcMidnight.getUTCDate() - 1);
+  yesterdayUtc.setUTCHours(0, 0, 0, 0);
+  // ✅ 오늘 기록 여부
+  const hasTodayEntry = entries.some(
+    (e) =>
+      e.date.toISOString().split("T")[0] ===
+      utcMidnight.toISOString().split("T")[0],
+  );
 
-  const hasYesterdayEntry = entries.some((e) => {
-    const d = new Date(e.date);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime() === yesterday.getTime();
-  });
+  // ✅ 어제 기록 여부
+  const hasYesterdayEntry = entries.some(
+    (e) =>
+      e.date.toISOString().split("T")[0] ===
+      yesterdayUtc.toISOString().split("T")[0],
+  );
 
-  if (hasYesterdayEntry) {
-    // 유지 (currentStreak 그대로)
+  // ✅ 오늘 기록이 있으면 유지, 없고 어제 기록도 없으면 끊김
+  if (hasTodayEntry || hasYesterdayEntry) {
+    // streak 유지 (아무것도 안 함)
   } else {
     currentStreak = 0;
   }
