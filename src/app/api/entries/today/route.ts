@@ -4,10 +4,10 @@ import { withAuth } from "@/lib/withAuth";
 
 export const GET = withAuth(async (session, req, { params }) => {
   // 오늘 날짜 00:00 ~ 23:59 범위 계산
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999);
+  const now = new Date();
+  const utcMidnight = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
 
   // 유저 정보 확인
   const user = await prisma.user.findUnique({
@@ -22,10 +22,7 @@ export const GET = withAuth(async (session, req, { params }) => {
   const todayEntry = await prisma.entry.findFirst({
     where: {
       userId: user.id,
-      date: {
-        gte: startOfDay,
-        lte: endOfDay,
-      },
+      date: utcMidnight,
     },
   });
 

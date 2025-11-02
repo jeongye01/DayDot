@@ -15,10 +15,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -74,7 +72,9 @@ const normalize = (d: Date) => {
 };
 
 const getEntryForDate = (date: Date, entries: Entry[]) => {
-  return entries.find((e) => e.date === toUTCMidnightISOString(date)) ?? null;
+  const targetDay = date.toISOString().split("T")[0]; // UTC 기준 yyyy-mm-dd
+
+  return entries.find((e) => e.date.split("T")[0] === targetDay) ?? null;
 };
 const toUTCMidnightISOString = (date: Date): string => {
   date.setUTCHours(0, 0, 0, 0);

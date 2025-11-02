@@ -80,7 +80,6 @@ export const MoodChart = () => {
     { mood: "ANGRY", count: statData?.stats?.["ANGRY"] ?? 0, index: 4 },
   ];
   const now = new Date();
-  console.log(now.toISOString()); // UTC 기준 ISO 문자열 (예: 2025-10-31T14:00:00.000Z)
 
   const utcString = now.toISOString();
   const localTime = new Date(utcString).toLocaleString(undefined, {
