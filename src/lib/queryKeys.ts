@@ -7,17 +7,9 @@ export const queryKeys = {
       [...queryKeys.entries.all, "list", params] as const,
     detail: ({ id }: GetEntryParams) =>
       [...queryKeys.entries.all, "detail", id] as const,
-    today: () => [...queryKeys.entries.all, "today"] as const,
+
+    stats: () => [...queryKeys.entries.all, "stats"] as const,
     streak: () => [...queryKeys.entries.all, "streak"] as const,
+    today: () => [...queryKeys.entries.all, "today"] as const,
   },
-
-  //   user: {
-  //     all: ["user"] as const,
-  //     profile: (id?: string) => ["user", "profile", id] as const,
-  //   },
-
-  //   stats: {
-  //     all: ["stats"] as const,
-  //     monthly: (month: string) => ["stats", "monthly", month] as const,
-  //   },
 };

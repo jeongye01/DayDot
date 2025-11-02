@@ -4,6 +4,7 @@ import { withAuth } from "@/lib/withAuth";
 
 export const GET = withAuth(async (session, req, { params }) => {
   // TODO: 반복 로직 없애기
+
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: { accounts: true },

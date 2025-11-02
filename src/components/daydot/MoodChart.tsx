@@ -68,7 +68,7 @@ const getWeightedColor = (data?: Record<MOOD, number>) => {
 
 export const MoodChart = () => {
   const { data: statData } = useQuery({
-    queryKey: queryKeys.entries.streak(),
+    queryKey: queryKeys.entries.stats(),
     queryFn: () => getStats(),
   });
   const waveColor = getWeightedColor(statData?.stats);
