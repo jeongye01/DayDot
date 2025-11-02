@@ -4,9 +4,14 @@ import { withAuth } from "@/lib/withAuth";
 
 export const GET = withAuth(async (session, req) => {
   const url = new URL(req.url);
-  const year = parseInt(url.searchParams.get("year") || "0", 10);
-  const month = parseInt(url.searchParams.get("month") || "0", 10);
-
+  const startDate = url.searchParams.get("startDate");
+  const endDate = url.searchParams.get("endDate");
+  if (!startDate || !endDate) {
+    return NextResponse.json(
+      { error: "startDate and endDate are required" },
+      { status: 400 },
+    );
+  }
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
@@ -14,13 +19,6 @@ export const GET = withAuth(async (session, req) => {
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
-
-  const now = new Date();
-  const targetYear = year || now.getFullYear();
-  const targetMonth = month || now.getMonth() + 1;
-
-  const startDate = new Date(targetYear, targetMonth - 1, 1);
-  const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59);
 
   const entries = await prisma.entry.findMany({
     where: {
