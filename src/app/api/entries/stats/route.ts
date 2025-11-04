@@ -13,8 +13,19 @@ export const GET = withAuth(async (session) => {
 
   // 이번 달 1일 ~ 다음 달 1일 범위
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const utcMidnight = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const startOfMonth = new Date(
+    utcMidnight.getFullYear(),
+    utcMidnight.getMonth(),
+    1,
+  );
+  const startOfNextMonth = new Date(
+    utcMidnight.getFullYear(),
+    utcMidnight.getMonth() + 1,
+    1,
+  );
 
   const entries = await prisma.entry.findMany({
     where: {

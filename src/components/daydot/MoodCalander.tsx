@@ -65,20 +65,23 @@ const MOODS: Record<MOOD, { img: string }> = {
   ANGRY: { img: "icons/angry.svg" },
 };
 
-const normalize = (d: Date) => {
-  const n = new Date(d);
-  n.setHours(12, 0, 0, 0); // UTC 시차 보정
-  return n;
-};
-
 const getEntryForDate = (date: Date, entries: Entry[]) => {
-  const targetDay = date.toISOString().split("T")[0]; // UTC 기준 yyyy-mm-dd
+  const targetDay = toUTCMidnightISOString(date).split("T")[0]; // UTC 기준 yyyy-mm-dd
 
   return entries.find((e) => e.date.split("T")[0] === targetDay) ?? null;
 };
 const toUTCMidnightISOString = (date: Date): string => {
-  date.setUTCHours(0, 0, 0, 0);
-  return date.toISOString();
+  // 브라우저의 타임존 오프셋(분 단위)
+  const offsetMinutes = date.getTimezoneOffset();
+
+  // 로컬 자정으로 설정 후, UTC로 변환
+  const localMidnight = new Date(date);
+  localMidnight.setHours(0, 0, 0, 0);
+
+  // 로컬 자정을 UTC 기준으로 보정
+  const utcTime = new Date(localMidnight.getTime() - offsetMinutes * 60 * 1000);
+
+  return utcTime.toISOString();
 };
 
 export const getTimeZone = () => {
@@ -186,11 +189,11 @@ const CustomDayButton = ({
 }) => {
   const { date, outside } = day;
 
-  const today = normalize(new Date());
-  const target = normalize(date);
+  const today = toUTCMidnightISOString(new Date());
+  const target = toUTCMidnightISOString(date);
 
-  const isFuture = target.getTime() > today.getTime();
-  const isToday = target.getTime() === today.getTime();
+  const isFuture = target > today;
+  const isToday = target === today;
 
   return (
     <DialogTrigger
