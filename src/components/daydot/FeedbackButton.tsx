@@ -51,7 +51,6 @@ export const FeedbackButton = () => {
       return;
     }
 
-    console.log({ rating, feedback }); // ✅ 서버로 전송하거나 상태 저장
     alert("피드백이 전송되었습니다 💛");
 
     setOpen(false);

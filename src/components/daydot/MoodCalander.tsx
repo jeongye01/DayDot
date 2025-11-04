@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
+
 import {
   Dialog,
   DialogClose,
@@ -13,10 +15,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -65,24 +65,73 @@ const MOODS: Record<MOOD, { img: string }> = {
   ANGRY: { img: "icons/angry.svg" },
 };
 
-const normalize = (d: Date) => {
-  const n = new Date(d);
-  n.setHours(12, 0, 0, 0); // UTC 시차 보정
-  return n;
-};
-
 const getEntryForDate = (date: Date, entries: Entry[]) => {
-  const normalized = date.toISOString().split("T")[0];
-  return entries.find((e) => e.date.startsWith(normalized)) ?? null;
+  const targetDay = toUTCMidnightISOString(date).split("T")[0]; // UTC 기준 yyyy-mm-dd
+
+  return entries.find((e) => e.date.split("T")[0] === targetDay) ?? null;
+};
+const toUTCMidnightISOString = (date: Date): string => {
+  // 브라우저의 타임존 오프셋(분 단위)
+  const offsetMinutes = date.getTimezoneOffset();
+
+  // 로컬 자정으로 설정 후, UTC로 변환
+  const localMidnight = new Date(date);
+  localMidnight.setHours(0, 0, 0, 0);
+
+  // 로컬 자정을 UTC 기준으로 보정
+  const utcTime = new Date(localMidnight.getTime() - offsetMinutes * 60 * 1000);
+
+  return utcTime.toISOString();
 };
 
+export const getTimeZone = () => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
+export const getUtcCalendarRange = ({
+  year: targetYear,
+  month: targetMonth,
+}: {
+  year: number;
+  month: number;
+}) => {
+  const timeZone = getTimeZone();
+
+  // 현지 기준 달력 범위 계산
+  const localStart = startOfWeek(
+    startOfMonth(new Date(targetYear, targetMonth - 1)),
+    {
+      weekStartsOn: 0, // 일요일 시작
+    },
+  );
+  const localEnd = endOfWeek(
+    endOfMonth(new Date(targetYear, targetMonth - 1)),
+    {
+      weekStartsOn: 0,
+    },
+  );
+
+  return {
+    utcStart: toUTCMidnightISOString(localStart),
+    utcEnd: toUTCMidnightISOString(localEnd),
+  };
+};
 export const MoodCalander = () => {
+  const [month, setMonth] = useState(new Date());
+
+  const year = month.getFullYear();
+  const currentMonth = month.getMonth() + 1; // 0~11 → 1~12로 변환
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { utcStart, utcEnd } = getUtcCalendarRange({
+    year,
+    month: currentMonth,
+  });
+
   const { data: entries = [] } = useQuery({
-    queryKey: queryKeys.entries.list({ year: 2025, month: 11 }),
-    queryFn: () => getEntryList({ year: 2025, month: 11 }),
+    queryKey: queryKeys.entries.list({ startDate: utcStart, endDate: utcEnd }),
+    queryFn: () => getEntryList({ startDate: utcStart, endDate: utcEnd }),
   });
   const handleDayClick = (date: Date) => {
     const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
@@ -90,6 +139,7 @@ export const MoodCalander = () => {
     setSelectedEntry(entry);
     setIsDialogOpen(true);
   };
+
   return (
     <div // TODO: Container 컴포넌트 만들기
       className="shadow-test2 flex flex-col items-center justify-center rounded-lg bg-white p-2"
@@ -97,9 +147,10 @@ export const MoodCalander = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <Calendar
           mode="single"
+          month={month}
+          onMonthChange={setMonth}
           components={{
             DayButton: (dayProps) => {
-              const entry = getEntryForDate(dayProps.day.date, entries);
               return (
                 <CustomDayButton
                   {...dayProps}
@@ -138,11 +189,11 @@ const CustomDayButton = ({
 }) => {
   const { date, outside } = day;
 
-  const today = normalize(new Date());
-  const target = normalize(date);
+  const today = toUTCMidnightISOString(new Date());
+  const target = toUTCMidnightISOString(date);
 
-  const isFuture = target.getTime() > today.getTime();
-  const isToday = target.getTime() === today.getTime();
+  const isFuture = target > today;
+  const isToday = target === today;
 
   return (
     <DialogTrigger
@@ -264,7 +315,7 @@ const EntryCreateDialog = ({
     mutate({
       mood: selectedMood,
       content: keyword,
-      date: date.toISOString(),
+      date: toUTCMidnightISOString(date),
     });
   };
   return (
@@ -283,7 +334,6 @@ const EntryCreateDialog = ({
             <RadioGroup
               value={selectedMood}
               onValueChange={(v) => {
-                console.log(v);
                 setSelectedMood(v);
               }}
               className="flex justify-center gap-6"
@@ -388,7 +438,6 @@ const EntryDetailDialog = ({
 
   useEffect(() => {
     if (isSuccess) {
-      console.log("???");
       setSelectedMood(entry.mood);
       setKeyword(entry.content ?? "");
     }

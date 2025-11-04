@@ -11,8 +11,8 @@ export interface Entry {
 export type GetEntryListData = Entry[];
 
 export interface GetEntryListParams {
-  year?: number;
-  month?: number;
+  startDate: string;
+  endDate: string;
 }
 
 export type GetEntryData = Entry;

@@ -3,11 +3,6 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-interface DayStreakCardProps {
-  current: number;
-  longest: number;
-  isTodayRecorded: boolean;
-}
 const getTimeOfDayIcon = () => {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 18) {
@@ -24,9 +19,9 @@ export const StreakCard = () => {
   });
   const { data: streakData } = useQuery({
     queryKey: queryKeys.entries.streak(),
-    queryFn: () => getStreak(),
+    queryFn: getStreak,
   });
-
+  console.log(queryKeys.entries.streak());
   // 🌞 오늘이 얼마나 지났는지 계산
   useEffect(() => {
     const getTodayProgress = () => {

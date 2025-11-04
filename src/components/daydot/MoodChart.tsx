@@ -68,7 +68,7 @@ const getWeightedColor = (data?: Record<MOOD, number>) => {
 
 export const MoodChart = () => {
   const { data: statData } = useQuery({
-    queryKey: queryKeys.entries.streak(),
+    queryKey: queryKeys.entries.stats(),
     queryFn: () => getStats(),
   });
   const waveColor = getWeightedColor(statData?.stats);
@@ -79,6 +79,13 @@ export const MoodChart = () => {
     { mood: "BAD", count: statData?.stats?.["BAD"] ?? 0, index: 3 },
     { mood: "ANGRY", count: statData?.stats?.["ANGRY"] ?? 0, index: 4 },
   ];
+  const now = new Date();
+
+  const utcString = now.toISOString();
+  const localTime = new Date(utcString).toLocaleString(undefined, {
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+
   return (
     <div className="shadow-test2 relative flex h-50 flex-col items-center justify-center gap-2 overflow-hidden rounded-lg bg-white p-2">
       <div className="![&_*:focus-visible]:outline-none flex h-64 w-full flex-col items-center justify-center outline-none focus:outline-none">
