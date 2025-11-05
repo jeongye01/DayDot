@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { UserProfile } from "@/components/daydot/layout/Header/UserProfile";
 import { Providers } from "./providers";
+import { FeedbackButton } from "@/components/daydot/FeedbackButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,10 @@ export default async function RootLayout({
                 </span>
                 <div className="bg-primary mb-1.5 h-2 w-2 rounded-full" />
               </div>
-              <UserProfile />
+              <div className="flex gap-2">
+                <FeedbackButton />
+                <UserProfile />
+              </div>
             </header>
 
             {/* Main */}

@@ -11,6 +11,7 @@ import {
   PatchEntryPayload,
   PostEntryPayload,
 } from "@/types/entries";
+import { PostFeedbackPayload } from "@/types/feedback";
 import { Entry } from "@prisma/client";
 
 // 🧾 일기 목록
@@ -62,5 +63,9 @@ export const getStreak = async (): Promise<GetStreakData> => {
 
 export const getStats = async (): Promise<GetStatsData> => {
   const { data } = await api.get(`/entries/stats`);
+  return data;
+};
+export const postFeedback = async (payload: PostFeedbackPayload) => {
+  const { data } = await api.post("/feedback", payload);
   return data;
 };
