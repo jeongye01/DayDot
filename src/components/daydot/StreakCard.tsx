@@ -69,10 +69,14 @@ export const StreakCard = () => {
       {/* 상태 문구 */}
       <p className="mt-1 text-xs text-gray-500">
         최장 연속 기록 {streakData?.maxStreak}일 • 오늘은{" "}
-        {hasWrittenTodayData?.hasWrittenToday ? (
-          <span className="text-primary font-medium">기록 완료</span>
-        ) : (
-          <span className="font-medium text-gray-900">아직 안 했어요</span>
+        {hasWrittenTodayData && (
+          <>
+            {hasWrittenTodayData.hasWrittenToday ? (
+              <span className="text-primary font-medium">기록 완료</span>
+            ) : (
+              <span className="font-medium text-gray-900">아직 안 했어요</span>
+            )}
+          </>
         )}
       </p>
     </div>

@@ -165,7 +165,7 @@ export const MoodCalander = () => {
         {isDialogOpen &&
           (selectedEntry ? (
             <EntryDetailDialog
-              id={selectedEntry.id}
+              entry={selectedEntry}
               onClose={() => setIsDialogOpen(false)}
             />
           ) : (
@@ -390,18 +390,16 @@ const EntryCreateDialog = ({
   );
 };
 const EntryDetailDialog = ({
-  id,
+  entry,
   onClose,
 }: {
-  id: Entry["id"];
+  entry: Entry;
   onClose: () => void;
 }) => {
-  const { data: entry, isSuccess } = useQuery({
-    queryKey: queryKeys.entries.detail({ id }),
-    queryFn: () => getEntry({ id }),
-    staleTime: 0, // 항상 최신
-    gcTime: 0, // 바로 갱신
-  });
+  // const { data: entry, isSuccess } = useQuery({
+  //   queryKey: queryKeys.entries.detail({ id }),
+  //   queryFn: () => getEntry({ id }),
+  // });
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
@@ -422,7 +420,7 @@ const EntryDetailDialog = ({
     },
   });
   const { mutate: mutateDelete } = useMutation({
-    mutationFn: () => deleteEntry(id),
+    mutationFn: () => deleteEntry(entry.id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
@@ -432,16 +430,18 @@ const EntryDetailDialog = ({
   });
   const date = new Date(entry?.date ?? "");
 
-  const [selectedMood, setSelectedMood] = useState<MOOD>();
-  const [keyword, setKeyword] = useState("");
+  // const [selectedMood, setSelectedMood] = useState<MOOD>();
+  // const [keyword, setKeyword] = useState("");
+  const [selectedMood, setSelectedMood] = useState<MOOD>(entry.mood);
+  const [keyword, setKeyword] = useState(entry.content);
   const debouncedKeyword = useDebounce(keyword, 400);
 
-  useEffect(() => {
-    if (isSuccess) {
-      setSelectedMood(entry.mood);
-      setKeyword(entry.content ?? "");
-    }
-  }, [isSuccess]);
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     setSelectedMood(entry.mood);
+  //     setKeyword(entry.content ?? "");
+  //   }
+  // }, [isSuccess]);
   useEffect(() => {
     if (entry && entry.mood !== selectedMood) {
       mutate({
@@ -587,6 +587,7 @@ const EntryDetailDialog = ({
             <Textarea
               id="content"
               name="content"
+              placeholder="왜 이런 기분이 들었나요?"
               defaultValue={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="resize-none !border-gray-200 !shadow-none"

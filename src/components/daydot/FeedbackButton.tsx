@@ -2,45 +2,19 @@
 import { Button } from "../ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Textarea } from "../ui/textarea";
-import Image from "next/image";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { PostFeedbackPayload } from "@/types/feedback";
 import { postFeedback } from "@/lib/queryFns";
-const FORM_MOODS = [
-  {
-    value: "HAPPY",
-    img: "icons/happy.svg",
-  },
-  {
-    value: "GOOD",
-    img: "icons/good.svg",
-  },
-  {
-    value: "NEUTRAL",
-    img: "icons/neutral.svg",
-  },
-  {
-    value: "BAD",
-    img: "icons/bad.svg",
-  },
-  {
-    value: "ANGRY",
-    img: "icons/angry.svg",
-  },
-];
+
 export const FeedbackButton = () => {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<PostFeedbackPayload["rating"] | 0>(0);

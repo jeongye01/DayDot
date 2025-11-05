@@ -11,7 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export const UserProfile = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   return (
     <>
@@ -73,6 +73,8 @@ export const UserProfile = () => {
             </button>
           </PopoverContent>
         </Popover>
+      ) : status === "loading" ? (
+        <></>
       ) : (
         <Popover>
           <PopoverTrigger asChild>
