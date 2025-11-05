@@ -1,5 +1,4 @@
 "use client";
-import { FeedbackButton } from "@/components/daydot/FeedbackButton";
 import { MoodCalander } from "@/components/daydot/MoodCalander";
 import { MoodChart } from "@/components/daydot/MoodChart";
 import { StreakCard } from "@/components/daydot/StreakCard";
@@ -16,7 +15,6 @@ export default function Home() {
       <section>
         <MoodChart />
       </section>
-      <FeedbackButton />
     </div>
   );
 }
