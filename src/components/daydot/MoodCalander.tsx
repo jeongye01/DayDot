@@ -399,8 +399,6 @@ const EntryDetailDialog = ({
   const { data: entry, isSuccess } = useQuery({
     queryKey: queryKeys.entries.detail({ id }),
     queryFn: () => getEntry({ id }),
-    staleTime: 0, // 항상 최신
-    gcTime: 0, // 바로 갱신
   });
   const queryClient = useQueryClient();
 
