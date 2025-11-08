@@ -374,7 +374,11 @@ const EntryCreateDialog = ({
           <DialogClose asChild>
             <Button variant="outline">취소</Button>
           </DialogClose>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            variant="default"
+            disabled={isPending || !selectedMood}
+          >
             {isPending ? "저장 중..." : "저장"}
           </Button>
         </DialogFooter>
