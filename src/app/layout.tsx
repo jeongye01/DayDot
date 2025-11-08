@@ -4,7 +4,7 @@ import "./globals.css";
 import { UserProfile } from "@/components/daydot/layout/Header/UserProfile";
 import { Providers } from "./providers";
 import { FeedbackButton } from "@/components/daydot/FeedbackButton";
-
+import { Toaster } from "@/components/ui/sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -47,6 +47,7 @@ export default async function RootLayout({
             {/* Main */}
             <main className="relative flex-1 overflow-y-auto p-4">
               {children}
+              <Toaster position="top-center" />
             </main>
           </div>
         </Providers>

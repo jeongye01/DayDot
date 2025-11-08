@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,12 @@ export const FeedbackButton = () => {
   const { mutate } = useMutation({
     mutationFn: ({ payload }: { payload: PostFeedbackPayload }) =>
       postFeedback(payload),
+    onSuccess: () => {
+      toast.success("감사합니다. 피드백이 전송 되었습니다.");
+    },
+    onError: () => {
+      toast.success("오류가 발생했습니다.");
+    },
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +38,6 @@ export const FeedbackButton = () => {
       return;
     }
 
-    alert("피드백이 전송되었습니다 💛");
     mutate({
       payload: {
         rating: rating as PostFeedbackPayload["rating"],

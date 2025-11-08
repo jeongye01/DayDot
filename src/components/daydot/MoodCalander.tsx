@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
-
+import { toast } from "sonner";
 import {
   Dialog,
   DialogClose,
@@ -46,13 +46,6 @@ import {
 } from "@/types/entries";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
-const moodColors: Record<string, string> = {
-  LOVE: "bg-pink-300",
-  GOOD: "bg-yellow-300",
-  NEUTRAL: "bg-gray-300",
-  BAD: "bg-blue-300",
-  ANGRY: "bg-red-300",
-};
 const MOODS: Record<MOOD, { img: string }> = {
   LOVE: {
     img: "icons/love.svg",
@@ -298,11 +291,11 @@ const EntryCreateDialog = ({
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
       });
-
+      toast.success("기록이 등록 되었습니다!");
       onClose?.();
     },
     onError: (error) => {
-      console.error("❌ 일기 등록 실패:", error);
+      toast.error("기록을 저장하지 못했습니다.");
     },
   });
 
