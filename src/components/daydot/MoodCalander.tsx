@@ -395,7 +395,7 @@ const EntryDetailDialog = ({
   // });
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation({
+  const { mutate, isError } = useMutation({
     mutationFn: ({
       id,
       payload,
@@ -408,9 +408,6 @@ const EntryDetailDialog = ({
         queryKey: queryKeys.entries.all,
       });
     },
-    onError: (error) => {
-      console.error("❌ 수정 실패:", error);
-    },
   });
   const { mutate: mutateDelete } = useMutation({
     mutationFn: () => deleteEntry(entry.id),
@@ -418,16 +415,21 @@ const EntryDetailDialog = ({
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
       });
+      toast.success("기록이 삭제되었습니다.");
       onClose(); // ✅ 모달 닫음
+    },
+    onError: () => {
+      toast.success("삭제 중 오류가 발생했습니다.");
     },
   });
   const date = new Date(entry?.date ?? "");
 
+  const isPending = true;
   // const [selectedMood, setSelectedMood] = useState<MOOD>();
   // const [keyword, setKeyword] = useState("");
   const [selectedMood, setSelectedMood] = useState<MOOD>(entry.mood);
   const [keyword, setKeyword] = useState(entry.content);
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const debouncedKeyword = useDebounce(keyword, 4000); // TODO: 첫 입력은 들어가게 수정
 
   // useEffect(() => {
   //   if (isSuccess) {
@@ -529,7 +531,7 @@ const EntryDetailDialog = ({
             )}
           </div>
           <div className="flex w-full flex-col gap-2">
-            <div className="gpa-2 -mt-[2px] flex flex-col">
+            <div className="-mt-[2px] flex items-center justify-between">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -575,12 +577,31 @@ const EntryDetailDialog = ({
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
+              {isError && (
+                <div className="text-accent-red flex gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-4"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                  <span className="text-[12px]">저장 실패</span>
+                </div>
+              )}
             </div>
             {/* // TODO: 모양에 변화 줘보기 */}
             <Textarea
               id="content"
               name="content"
-              placeholder="왜 이런 기분이 들었나요?"
+              placeholder="왜 이 기분이 들었나요?"
               defaultValue={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="resize-none !border-gray-200 !shadow-none"
