@@ -190,7 +190,7 @@ const CustomDayButton = ({
 
   return (
     <DialogTrigger
-      className="flex w-fit flex-col items-center"
+      className="flex w-full flex-col items-center"
       disabled={isFuture}
       onClick={() => {
         if (!isFuture) onOpen();

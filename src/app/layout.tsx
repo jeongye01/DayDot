@@ -27,9 +27,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex max-h-screen flex-col items-center bg-white text-gray-900">
+      <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
-          <div className="flex h-screen w-full max-w-[470px] flex-col bg-gray-50">
+          <div className="flex h-screen w-full max-w-[560px] flex-col">
             {/* Header */}
             <header className="flex h-12 items-center justify-between px-4">
               <div className="flex items-end gap-1">
@@ -45,7 +45,7 @@ export default async function RootLayout({
             </header>
 
             {/* Main */}
-            <main className="relative flex-1 overflow-y-auto p-4">
+            <main className="relative overflow-y-auto p-4">
               {children}
               <Toaster position="top-center" />
             </main>
