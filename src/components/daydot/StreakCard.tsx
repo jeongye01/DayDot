@@ -21,7 +21,7 @@ export const StreakCard = () => {
     queryKey: queryKeys.entries.streak(),
     queryFn: getStreak,
   });
-  console.log(queryKeys.entries.streak());
+
   // 🌞 오늘이 얼마나 지났는지 계산
   useEffect(() => {
     const getTodayProgress = () => {

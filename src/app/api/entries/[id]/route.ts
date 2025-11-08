@@ -22,6 +22,7 @@ export const PATCH = withAuth(
       where: { id: params.id },
       data: { mood, content },
     });
+    throw new Error("test");
     return NextResponse.json(updated);
   },
   { requireOwnership: true },
