@@ -50,6 +50,7 @@ import {
   PostEntryPayload,
 } from "@/types/entries";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { XIcon } from "lucide-react";
 
 const MOODS: Record<MOOD, { img: string }> = {
   LOVE: {
@@ -393,19 +394,24 @@ const EntryCreateDialog = ({
   );
 };
 const EntryDetailDialog = ({
-  entry,
+  entry: calanderEntry,
   onClose,
 }: {
   entry: Entry;
   onClose: () => void;
 }) => {
-  // const { data: entry, isSuccess } = useQuery({
-  //   queryKey: queryKeys.entries.detail({ id }),
-  //   queryFn: () => getEntry({ id }),
-  // });
+  const {
+    data: entry,
+    isSuccess,
+    isFetching,
+  } = useQuery({
+    queryKey: queryKeys.entries.detail({ id: calanderEntry.id }),
+    queryFn: () => getEntry({ id: calanderEntry.id }),
+    placeholderData: keepPreviousData,
+  });
   const queryClient = useQueryClient();
 
-  const { mutate, isError } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: ({
       id,
       payload,
@@ -417,6 +423,7 @@ const EntryDetailDialog = ({
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
       });
+      toast.success(`변경사항이 저장되었습니다.`);
     },
     onError: () => {
       toast.error(
@@ -424,8 +431,9 @@ const EntryDetailDialog = ({
       );
     },
   });
+
   const { mutate: mutateDelete } = useMutation({
-    mutationFn: () => deleteEntry(entry.id),
+    mutationFn: () => deleteEntry(calanderEntry.id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
@@ -437,66 +445,29 @@ const EntryDetailDialog = ({
       toast.success("삭제 중 오류가 발생했습니다.");
     },
   });
-  const date = new Date(entry?.date ?? "");
 
-  // const [selectedMood, setSelectedMood] = useState<MOOD>();
-  // const [keyword, setKeyword] = useState("");
-  const [selectedMood, setSelectedMood] = useState<MOOD>(entry.mood);
-  const [keyword, setKeyword] = useState(entry.content);
-  const { debounced: debouncedKeyword, flush } = useDebounce(keyword, 500);
+  const date = new Date(calanderEntry.date ?? "");
 
-  // useEffect(() => {
-  //   if (entry) {
-  //     setSelectedMood(entry.mood);
-  //     setKeyword(entry.content ?? "");
-  //   }
-  // }, [entry.content]);
+  const [selectedMood, setSelectedMood] = useState<MOOD>();
+  const [keyword, setKeyword] = useState<string>();
+
   useEffect(() => {
-    if (entry && entry.mood !== selectedMood) {
-      mutate({
-        id: entry.id,
-        payload: {
-          mood: selectedMood,
-          content: debouncedKeyword,
-        },
-      });
+    if (entry && !selectedMood && !keyword) {
+      setSelectedMood(entry.mood);
+      setKeyword(entry.content ?? "");
     }
-  }, [selectedMood]);
-  // ✅ 디바운스된 메모 변경 시 PATCH
-  useEffect(() => {
-    if (entry && entry.content !== debouncedKeyword) {
-      mutate({
-        id: entry.id,
-        payload: {
-          mood: selectedMood ?? entry.mood,
-          content: debouncedKeyword,
-        },
-      });
-    }
-  }, [debouncedKeyword]);
-  const latestStateRef = useRef({ keyword, selectedMood });
-  useEffect(() => {
-    latestStateRef.current = { keyword, selectedMood };
-  }, [keyword, selectedMood]);
+  }, [isSuccess]);
 
-  // 언마운트 시 자동 저장
-  useEffect(() => {
-    return () => {
-      flush();
+  const isDirty =
+    entry &&
+    !isFetching &&
+    !isPending &&
+    (entry.mood !== selectedMood || entry.content !== keyword);
 
-      mutate({
-        id: entry.id,
-        payload: {
-          mood: latestStateRef.current.selectedMood ?? entry.mood,
-          content: latestStateRef.current.keyword,
-        },
-      });
-    };
-  }, []);
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>
+        <DialogTitle className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-[16px]">{formatDate(date.toString())}</span>
             <DropdownMenu>
@@ -554,14 +525,12 @@ const EntryDetailDialog = ({
       <div className="">
         <div className="flex items-start gap-2">
           <div className="-mt-[10px] -ml-[10px]">
-            {selectedMood && (
-              <Image
-                alt="happy"
-                width={52}
-                height={52}
-                src={MOODS[selectedMood]?.img}
-              />
-            )}
+            <Image
+              alt="happy"
+              width={52}
+              height={52}
+              src={MOODS[selectedMood ?? calanderEntry.mood].img}
+            />
           </div>
           <div className="flex w-full flex-col gap-2">
             <div className="-mt-[2px] flex items-center justify-between">
@@ -572,7 +541,9 @@ const EntryDetailDialog = ({
                     size="custom"
                     className="flex w-fit items-center gap-1 border !border-gray-200 px-1 py-1"
                   >
-                    <span className="text-[12px]">{selectedMood}</span>
+                    <span className="text-[12px]">
+                      {selectedMood ?? calanderEntry.mood}
+                    </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -610,24 +581,23 @@ const EntryDetailDialog = ({
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {isError && (
-                <div className="text-accent-red flex gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                    />
-                  </svg>
-                  <span className="text-[12px]">저장 실패</span>
-                </div>
+              {isDirty && (
+                <Button
+                  size={"custom"}
+                  onClick={() => {
+                    if (selectedMood) {
+                      mutate({
+                        id: calanderEntry.id,
+                        payload: { mood: selectedMood, content: keyword },
+                      });
+                    }
+                  }}
+                  disabled={!isDirty}
+                  variant="default"
+                  className="px-2 py-1 text-[12px]"
+                >
+                  편집 완료
+                </Button>
               )}
             </div>
             {/* // TODO: 모양에 변화 줘보기 */}
