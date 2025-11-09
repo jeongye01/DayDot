@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
+import { toUTCMidnight, toUTCMidnightISOString } from "@/lib/utils";
 
 export const GET = withAuth(async (session) => {
   const user = await prisma.user.findUnique({
@@ -13,9 +14,8 @@ export const GET = withAuth(async (session) => {
 
   // 이번 달 1일 ~ 다음 달 1일 범위
   const now = new Date();
-  const utcMidnight = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  );
+  const utcMidnight = toUTCMidnight(now);
+
   const startOfMonth = new Date(
     utcMidnight.getFullYear(),
     utcMidnight.getMonth(),

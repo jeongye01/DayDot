@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
+import { toUTCMidnightISOString } from "@/lib/utils";
 // TODO: 성능 개선 고민 필요
 // FIXME: 연속 기록 버그 있음. 이틀 이상 기록 안해야 연속 일수 초기화 됌
 export const GET = withAuth(async (session, req, { params }) => {
@@ -45,25 +46,21 @@ export const GET = withAuth(async (session, req, { params }) => {
     }
   }
   const now = new Date();
-  const utcMidnight = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  );
-  // ✅ 어제 기록이 있으면 streak 유지
-  const yesterdayUtc = new Date(utcMidnight);
-  yesterdayUtc.setUTCDate(utcMidnight.getUTCDate() - 1);
-  yesterdayUtc.setUTCHours(0, 0, 0, 0);
+  const yesterday = new Date(now);
+  yesterday.setUTCDate(now.getUTCDate() - 1);
+
   // ✅ 오늘 기록 여부
   const hasTodayEntry = entries.some(
     (e) =>
       e.date.toISOString().split("T")[0] ===
-      utcMidnight.toISOString().split("T")[0],
+      toUTCMidnightISOString(now).split("T")[0],
   );
 
   // ✅ 어제 기록 여부
   const hasYesterdayEntry = entries.some(
     (e) =>
       e.date.toISOString().split("T")[0] ===
-      yesterdayUtc.toISOString().split("T")[0],
+      toUTCMidnightISOString(yesterday).split("T")[0],
   );
 
   // ✅ 오늘 기록이 있으면 유지, 없고 어제 기록도 없으면 끊김
