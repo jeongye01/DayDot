@@ -29,7 +29,12 @@ import { Label } from "../ui/label";
 
 import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   deleteEntry,
@@ -125,6 +130,7 @@ export const MoodCalander = () => {
   const { data: entries = [] } = useQuery({
     queryKey: queryKeys.entries.list({ startDate: utcStart, endDate: utcEnd }),
     queryFn: () => getEntryList({ startDate: utcStart, endDate: utcEnd }),
+    placeholderData: (prev) => prev,
   });
   const handleDayClick = (date: Date) => {
     const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
@@ -294,7 +300,7 @@ const EntryCreateDialog = ({
       toast.success("기록이 등록 되었습니다!");
       onClose?.();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("기록을 저장하지 못했습니다.");
     },
   });
@@ -412,6 +418,11 @@ const EntryDetailDialog = ({
         queryKey: queryKeys.entries.all,
       });
     },
+    onError: () => {
+      toast.error(
+        `기록 업데이트 중 오류가 발생했습니다.(${formatDate(date.toString())})`,
+      );
+    },
   });
   const { mutate: mutateDelete } = useMutation({
     mutationFn: () => deleteEntry(entry.id),
@@ -428,19 +439,18 @@ const EntryDetailDialog = ({
   });
   const date = new Date(entry?.date ?? "");
 
-  const isPending = true;
   // const [selectedMood, setSelectedMood] = useState<MOOD>();
   // const [keyword, setKeyword] = useState("");
   const [selectedMood, setSelectedMood] = useState<MOOD>(entry.mood);
   const [keyword, setKeyword] = useState(entry.content);
-  const debouncedKeyword = useDebounce(keyword, 4000); // TODO: 첫 입력은 들어가게 수정
+  const { debounced: debouncedKeyword, flush } = useDebounce(keyword, 500);
 
   // useEffect(() => {
-  //   if (isSuccess) {
+  //   if (entry) {
   //     setSelectedMood(entry.mood);
   //     setKeyword(entry.content ?? "");
   //   }
-  // }, [isSuccess]);
+  // }, [entry.content]);
   useEffect(() => {
     if (entry && entry.mood !== selectedMood) {
       mutate({
@@ -464,6 +474,25 @@ const EntryDetailDialog = ({
       });
     }
   }, [debouncedKeyword]);
+  const latestStateRef = useRef({ keyword, selectedMood });
+  useEffect(() => {
+    latestStateRef.current = { keyword, selectedMood };
+  }, [keyword, selectedMood]);
+
+  // 언마운트 시 자동 저장
+  useEffect(() => {
+    return () => {
+      flush();
+
+      mutate({
+        id: entry.id,
+        payload: {
+          mood: latestStateRef.current.selectedMood ?? entry.mood,
+          content: latestStateRef.current.keyword,
+        },
+      });
+    };
+  }, []);
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
