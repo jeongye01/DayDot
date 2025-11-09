@@ -29,7 +29,12 @@ import { Label } from "../ui/label";
 
 import { Textarea } from "../ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   deleteEntry,
@@ -45,6 +50,8 @@ import {
   PostEntryPayload,
 } from "@/types/entries";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { XIcon } from "lucide-react";
+import { toUTCMidnightISOString } from "@/lib/utils";
 
 const MOODS: Record<MOOD, { img: string }> = {
   LOVE: {
@@ -62,19 +69,6 @@ const getEntryForDate = (date: Date, entries: Entry[]) => {
   const targetDay = toUTCMidnightISOString(date).split("T")[0]; // UTC 기준 yyyy-mm-dd
 
   return entries.find((e) => e.date.split("T")[0] === targetDay) ?? null;
-};
-const toUTCMidnightISOString = (date: Date): string => {
-  // 브라우저의 타임존 오프셋(분 단위)
-  const offsetMinutes = date.getTimezoneOffset();
-
-  // 로컬 자정으로 설정 후, UTC로 변환
-  const localMidnight = new Date(date);
-  localMidnight.setHours(0, 0, 0, 0);
-
-  // 로컬 자정을 UTC 기준으로 보정
-  const utcTime = new Date(localMidnight.getTime() - offsetMinutes * 60 * 1000);
-
-  return utcTime.toISOString();
 };
 
 export const getTimeZone = () => {
@@ -125,6 +119,7 @@ export const MoodCalander = () => {
   const { data: entries = [] } = useQuery({
     queryKey: queryKeys.entries.list({ startDate: utcStart, endDate: utcEnd }),
     queryFn: () => getEntryList({ startDate: utcStart, endDate: utcEnd }),
+    placeholderData: (prev) => prev,
   });
   const handleDayClick = (date: Date) => {
     const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
@@ -294,19 +289,19 @@ const EntryCreateDialog = ({
       toast.success("기록이 등록 되었습니다!");
       onClose?.();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("기록을 저장하지 못했습니다.");
     },
   });
 
   const queryClient = useQueryClient();
   const [selectedMood, setSelectedMood] = useState<MOOD>();
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState<string>();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     mutate({
-      mood: selectedMood,
+      mood: selectedMood!,
       content: keyword,
       date: toUTCMidnightISOString(date),
     });
@@ -374,7 +369,11 @@ const EntryCreateDialog = ({
           <DialogClose asChild>
             <Button variant="outline">취소</Button>
           </DialogClose>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            variant="default"
+            disabled={isPending || !selectedMood}
+          >
             {isPending ? "저장 중..." : "저장"}
           </Button>
         </DialogFooter>
@@ -383,19 +382,24 @@ const EntryCreateDialog = ({
   );
 };
 const EntryDetailDialog = ({
-  entry,
+  entry: calanderEntry,
   onClose,
 }: {
   entry: Entry;
   onClose: () => void;
 }) => {
-  // const { data: entry, isSuccess } = useQuery({
-  //   queryKey: queryKeys.entries.detail({ id }),
-  //   queryFn: () => getEntry({ id }),
-  // });
+  const {
+    data: entry,
+    isSuccess,
+    isFetching,
+  } = useQuery({
+    queryKey: queryKeys.entries.detail({ id: calanderEntry.id }),
+    queryFn: () => getEntry({ id: calanderEntry.id }),
+    placeholderData: keepPreviousData,
+  });
   const queryClient = useQueryClient();
 
-  const { mutate, isError } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: ({
       id,
       payload,
@@ -407,10 +411,17 @@ const EntryDetailDialog = ({
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
       });
+      toast.success(`변경사항이 저장되었습니다.`);
+    },
+    onError: () => {
+      toast.error(
+        `기록 업데이트 중 오류가 발생했습니다.(${formatDate(date.toString())})`,
+      );
     },
   });
+
   const { mutate: mutateDelete } = useMutation({
-    mutationFn: () => deleteEntry(entry.id),
+    mutationFn: () => deleteEntry(calanderEntry.id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.entries.all,
@@ -422,48 +433,29 @@ const EntryDetailDialog = ({
       toast.success("삭제 중 오류가 발생했습니다.");
     },
   });
-  const date = new Date(entry?.date ?? "");
 
-  const isPending = true;
-  // const [selectedMood, setSelectedMood] = useState<MOOD>();
-  // const [keyword, setKeyword] = useState("");
-  const [selectedMood, setSelectedMood] = useState<MOOD>(entry.mood);
-  const [keyword, setKeyword] = useState(entry.content);
-  const debouncedKeyword = useDebounce(keyword, 4000); // TODO: 첫 입력은 들어가게 수정
+  const date = new Date(calanderEntry.date ?? "");
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     setSelectedMood(entry.mood);
-  //     setKeyword(entry.content ?? "");
-  //   }
-  // }, [isSuccess]);
+  const [selectedMood, setSelectedMood] = useState<MOOD>();
+  const [keyword, setKeyword] = useState<string>();
+
   useEffect(() => {
-    if (entry && entry.mood !== selectedMood) {
-      mutate({
-        id: entry.id,
-        payload: {
-          mood: selectedMood,
-          content: debouncedKeyword,
-        },
-      });
+    if (entry && !selectedMood && !keyword) {
+      setSelectedMood(entry.mood);
+      setKeyword(entry.content ?? "");
     }
-  }, [selectedMood]);
-  // ✅ 디바운스된 메모 변경 시 PATCH
-  useEffect(() => {
-    if (entry && entry.content !== debouncedKeyword) {
-      mutate({
-        id: entry.id,
-        payload: {
-          mood: selectedMood ?? entry.mood,
-          content: debouncedKeyword,
-        },
-      });
-    }
-  }, [debouncedKeyword]);
+  }, [isSuccess]);
+
+  const isDirty =
+    entry &&
+    !isFetching &&
+    !isPending &&
+    (entry.mood !== selectedMood || entry.content !== keyword);
+
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>
+        <DialogTitle className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-[16px]">{formatDate(date.toString())}</span>
             <DropdownMenu>
@@ -521,14 +513,12 @@ const EntryDetailDialog = ({
       <div className="">
         <div className="flex items-start gap-2">
           <div className="-mt-[10px] -ml-[10px]">
-            {selectedMood && (
-              <Image
-                alt="happy"
-                width={52}
-                height={52}
-                src={MOODS[selectedMood]?.img}
-              />
-            )}
+            <Image
+              alt="happy"
+              width={52}
+              height={52}
+              src={MOODS[selectedMood ?? calanderEntry.mood].img}
+            />
           </div>
           <div className="flex w-full flex-col gap-2">
             <div className="-mt-[2px] flex items-center justify-between">
@@ -539,7 +529,9 @@ const EntryDetailDialog = ({
                     size="custom"
                     className="flex w-fit items-center gap-1 border !border-gray-200 px-1 py-1"
                   >
-                    <span className="text-[12px]">{selectedMood}</span>
+                    <span className="text-[12px]">
+                      {selectedMood ?? calanderEntry.mood}
+                    </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -549,8 +541,8 @@ const EntryDetailDialog = ({
                       className="size-3"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         d="m19.5 8.25-7.5 7.5-7.5-7.5"
                       />
                     </svg>
@@ -577,24 +569,23 @@ const EntryDetailDialog = ({
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {isError && (
-                <div className="text-accent-red flex gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                    />
-                  </svg>
-                  <span className="text-[12px]">저장 실패</span>
-                </div>
+              {isDirty && (
+                <Button
+                  size={"custom"}
+                  onClick={() => {
+                    if (selectedMood) {
+                      mutate({
+                        id: calanderEntry.id,
+                        payload: { mood: selectedMood, content: keyword },
+                      });
+                    }
+                  }}
+                  disabled={!isDirty}
+                  variant="default"
+                  className="px-2 py-1 text-[12px]"
+                >
+                  편집 완료
+                </Button>
               )}
             </div>
             {/* // TODO: 모양에 변화 줘보기 */}
