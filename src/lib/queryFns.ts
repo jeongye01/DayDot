@@ -1,0 +1,71 @@
+// src/lib/queryFns.ts
+import { api } from "@/lib/axios";
+import {
+  GetEntryData,
+  GetEntryListData,
+  GetEntryListParams,
+  GetEntryParams,
+  GetHasWrittenTodayData,
+  GetStatsData,
+  GetStreakData,
+  PatchEntryPayload,
+  PostEntryPayload,
+} from "@/types/entries";
+import { PostFeedbackPayload } from "@/types/feedback";
+import { Entry } from "@prisma/client";
+
+// 🧾 일기 목록
+export const getEntryList = async (
+  params?: GetEntryListParams,
+): Promise<GetEntryListData> => {
+  const { data } = await api.get("/entries", { params });
+  return data;
+};
+
+// 📖 일기 상세
+export const getEntry = async ({
+  id,
+}: GetEntryParams): Promise<GetEntryData> => {
+  const { data } = await api.get(`/entries/${id}`);
+  return data;
+};
+
+// ✍️ 일기 작성
+export const postEntry = async (
+  payload: PostEntryPayload,
+): Promise<GetEntryData> => {
+  const { data } = await api.post("/entries", payload);
+  return data;
+};
+// 🧩 일기 수정
+export const patchEntry = async (
+  id: Entry["id"],
+  payload: PatchEntryPayload,
+): Promise<GetEntryData> => {
+  const { data } = await api.patch(`/entries/${id}`, payload);
+  return data;
+};
+// ❌ 일기 삭제
+export const deleteEntry = async (id: Entry["id"]) => {
+  const { data } = await api.delete(`/entries/${id}`);
+  return data;
+};
+
+export const getHasWrittenToday = async (): Promise<GetHasWrittenTodayData> => {
+  const { data } = await api.get(`/entries/today`);
+  return data;
+};
+
+export const getStreak = async (): Promise<GetStreakData> => {
+  const { data } = await api.get(`/entries/streak`);
+  return data;
+};
+
+export const getStats = async (): Promise<GetStatsData> => {
+  const { data } = await api.get(`/entries/stats`);
+  return data;
+};
+export const postFeedback = async (payload: PostFeedbackPayload) => {
+  const { data } = await api.post("/feedback", payload);
+  return data;
+};
