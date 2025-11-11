@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "DayDot" }],
   metadataBase: new URL("https://daydot.me"),
+  icons: {
+    icon: "/favicon.ico", // ✅ public/ 경로 기준으로 작성
+  },
 };
 export default async function RootLayout({
   children,
@@ -38,6 +41,25 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+      </head>
       <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
           <div className="flex h-screen w-full max-w-[560px] flex-col">
