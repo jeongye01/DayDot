@@ -26,7 +26,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
           <div className="flex h-screen w-full max-w-[560px] flex-col">
