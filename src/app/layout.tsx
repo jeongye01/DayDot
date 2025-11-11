@@ -5,6 +5,7 @@ import { UserProfile } from "@/components/daydot/layout/Header/UserProfile";
 import { Providers } from "./providers";
 import { FeedbackButton } from "@/components/daydot/FeedbackButton";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -59,6 +60,20 @@ export default async function RootLayout({
           sizes="16x16"
           href="/favicon-16x16.png"
         />
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-L4LNDCVN1B"
+          strategy="afterInteractive"
+        />
+        <Script id="ga-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-L4LNDCVN1B');
+          `}
+        </Script>
       </head>
       <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
