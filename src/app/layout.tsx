@@ -27,6 +27,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
           <div className="flex h-screen w-full max-w-[560px] flex-col">
