@@ -57,7 +57,7 @@ export const GET = withAuth(async (session) => {
     },
     { LOVE: 0, GOOD: 0, NEUTRAL: 0, BAD: 0, ANGRY: 0 },
   );
-
+  console.log("MoodStats type:", typeof ({} as MoodStats));
   // 가장 많이 나온 감정
   const mostFrequentMood = Object.entries(stats).reduce((a, b) =>
     b[1] > a[1] ? b : a,
