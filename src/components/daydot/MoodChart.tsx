@@ -22,10 +22,11 @@ const moodColors: Record<MOOD, RGB> = {
   BAD: [218, 104, 13],
   ANGRY: [231, 42, 39],
 };
-const MoodTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MoodTooltip = ({ active, payload }: any) => {
   if (!active || !payload || !payload.length) return null;
   const { mood, count } = payload[0].payload;
-  const color = `rgb(${moodColors[mood].join(",")})`;
+  const color = `rgb(${moodColors[mood as MOOD].join(",")})`;
 
   return (
     <div
@@ -79,12 +80,6 @@ export const MoodChart = () => {
     { mood: "BAD", count: statData?.stats?.["BAD"] ?? 0, index: 3 },
     { mood: "ANGRY", count: statData?.stats?.["ANGRY"] ?? 0, index: 4 },
   ];
-  const now = new Date();
-
-  const utcString = now.toISOString();
-  const localTime = new Date(utcString).toLocaleString(undefined, {
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  });
 
   return (
     <div className="shadow-test2 relative flex h-50 flex-col items-center justify-center gap-2 overflow-hidden rounded-lg bg-white p-2">

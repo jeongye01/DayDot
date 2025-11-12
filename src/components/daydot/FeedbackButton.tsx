@@ -77,20 +77,22 @@ export const FeedbackButton = () => {
             <div className="grid gap-3">
               <Label>만족도</Label>
               <div className="flex justify-center gap-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setRating(i)}
-                    className={`text-3xl transition-transform ${
-                      i <= rating
-                        ? "scale-110 text-yellow-400"
-                        : "text-gray-300 hover:text-yellow-300"
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
+                {([1, 2, 3, 4, 5] as PostFeedbackPayload["rating"][]).map(
+                  (i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setRating(i)}
+                      className={`text-3xl transition-transform ${
+                        i <= rating
+                          ? "scale-110 text-yellow-400"
+                          : "text-gray-300 hover:text-yellow-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ),
+                )}
               </div>
             </div>
 

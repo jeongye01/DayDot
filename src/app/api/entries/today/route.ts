@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
 
-export const GET = withAuth(async (session, req, { params }) => {
+export const GET = withAuth(async (session) => {
   // 오늘 날짜 00:00 ~ 23:59 범위 계산
   const now = new Date();
   const utcMidnight = new Date(

@@ -4,7 +4,7 @@ import { withAuth } from "@/lib/withAuth";
 import { toUTCMidnightISOString } from "@/lib/utils";
 // TODO: 성능 개선 고민 필요
 // FIXME: 연속 기록 버그 있음. 이틀 이상 기록 안해야 연속 일수 초기화 됌
-export const GET = withAuth(async (session, req, { params }) => {
+export const GET = withAuth(async (session) => {
   // TODO: 반복 로직 없애기
 
   const user = await prisma.user.findUnique({

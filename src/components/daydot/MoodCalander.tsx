@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { toast } from "sonner";
@@ -49,8 +50,7 @@ import {
   PatchEntryPayload,
   PostEntryPayload,
 } from "@/types/entries";
-import { useDebounce } from "@/lib/hooks/useDebounce";
-import { XIcon } from "lucide-react";
+
 import { toUTCMidnightISOString } from "@/lib/utils";
 
 const MOODS: Record<MOOD, { img: string }> = {
@@ -82,8 +82,6 @@ export const getUtcCalendarRange = ({
   year: number;
   month: number;
 }) => {
-  const timeZone = getTimeZone();
-
   // 현지 기준 달력 범위 계산
   const localStart = startOfWeek(
     startOfMonth(new Date(targetYear, targetMonth - 1)),
@@ -158,7 +156,7 @@ export const MoodCalander = () => {
             />
           ) : (
             <EntryCreateDialog
-              date={selectedDate}
+              date={selectedDate!}
               onClose={() => setIsDialogOpen(false)}
             />
           ))}
@@ -322,7 +320,7 @@ const EntryCreateDialog = ({
             <RadioGroup
               value={selectedMood}
               onValueChange={(v) => {
-                setSelectedMood(v);
+                setSelectedMood(v as MOOD);
               }}
               className="flex justify-center gap-6"
             >
@@ -555,11 +553,15 @@ const EntryDetailDialog = ({
                   <DropdownMenuRadioGroup
                     value={selectedMood}
                     onValueChange={(v) => {
-                      setSelectedMood(v);
+                      setSelectedMood(v as MOOD);
                     }}
                   >
                     {Object.entries(MOODS).map(([mood, { img }]) => (
-                      <DropdownMenuRadioItem value={mood} className="pl-5">
+                      <DropdownMenuRadioItem
+                        value={mood}
+                        className="pl-5"
+                        key={mood}
+                      >
                         <div className="flex items-center justify-start">
                           <Image alt="happy" width={24} height={24} src={img} />
                           <span>{mood}</span>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
-import { toUTCMidnight, toUTCMidnightISOString } from "@/lib/utils";
+import { toUTCMidnight } from "@/lib/utils";
 
 export const GET = withAuth(async (session) => {
   const user = await prisma.user.findUnique({
