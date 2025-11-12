@@ -14,7 +14,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ profile, account }) {
+    async signIn({ profile }) {
       // 1. 구글 프로필 검증
       // TODO: 프론트에서 “Google 프로필 정보가 올바르지 않습니다” 표시
       if (!profile?.email || !profile?.name) {
