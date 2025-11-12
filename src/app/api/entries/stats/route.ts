@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
 import { toUTCMidnight } from "@/lib/utils";
-
+interface MoodStats {
+  [key: string]: number;
+}
 export const GET = withAuth(async (session) => {
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
@@ -48,7 +50,7 @@ export const GET = withAuth(async (session) => {
   }
 
   // 감정 카운트 계산
-  const stats = entries.reduce(
+  const stats = entries.reduce<MoodStats>(
     (acc, e) => {
       acc[e.mood] = (acc[e.mood] || 0) + 1;
       return acc;
