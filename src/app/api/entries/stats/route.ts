@@ -50,7 +50,6 @@ export const GET = withAuth(async (session) => {
   }
 
   // 감정 카운트 계산
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stats = entries.reduce<MoodStats>(
     (acc, e) => {
       acc[e.mood] = (acc[e.mood] || 0) + 1;
