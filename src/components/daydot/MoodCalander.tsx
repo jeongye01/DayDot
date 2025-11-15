@@ -119,18 +119,30 @@ export const MoodCalander = () => {
     queryFn: () => getEntryList({ startDate: utcStart, endDate: utcEnd }),
     placeholderData: (prev) => prev,
   });
-  const handleDayClick = (date: Date) => {
-    const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
-    setSelectedDate(date);
-    setSelectedEntry(entry);
-    setIsDialogOpen(true);
+  const handleDayClick = (date: Date, isFuture: boolean) => {
+    if (isFuture) {
+      toast.info("오늘 이후의 날짜입니다.", {
+        duration: 1200,
+      });
+      setIsDialogOpen(false);
+    } else {
+      const entry = getEntryForDate(date, entries); // 있으면 Entry, 없으면 null
+      setSelectedDate(date);
+      setSelectedEntry(entry);
+      setIsDialogOpen(true);
+    }
   };
 
   return (
     <div // TODO: Container 컴포넌트 만들기
       className="shadow-test2 flex flex-col items-center justify-center rounded-lg bg-white p-2"
     >
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(v) => {
+          if (!v) setIsDialogOpen(false);
+        }}
+      >
         <Calendar
           mode="single"
           month={month}
@@ -141,7 +153,9 @@ export const MoodCalander = () => {
                 <CustomDayButton
                   {...dayProps}
                   entry={getEntryForDate(dayProps.day.date, entries)}
-                  onOpen={() => handleDayClick(dayProps.day.date)}
+                  onOpen={(isFuture) =>
+                    handleDayClick(dayProps.day.date, isFuture)
+                  }
                 />
               );
             },
@@ -171,7 +185,7 @@ const CustomDayButton = ({
   day,
 }: DayButtonProps & {
   entry: Entry | null;
-  onOpen: () => void;
+  onOpen: (isFuture: boolean) => void;
 }) => {
   const { date, outside } = day;
 
@@ -184,14 +198,11 @@ const CustomDayButton = ({
   return (
     <DialogTrigger
       className="flex w-full flex-col items-center"
-      disabled={isFuture}
-      onClick={() => {
-        if (!isFuture) onOpen();
-      }}
+      onClick={() => onOpen(isFuture)}
     >
       <div
         className={clsx(
-          "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100",
+          "flex min-h-8 min-w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100",
           isToday && "!bg-primary text-white",
         )}
       >
