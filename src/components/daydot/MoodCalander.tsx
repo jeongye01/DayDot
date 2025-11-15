@@ -598,8 +598,12 @@ const EntryDetailDialog = ({
               id="content"
               name="content"
               placeholder="왜 이 기분이 들었나요?"
-              defaultValue={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              defaultValue={keyword ?? calanderEntry.content}
+              onChange={(e) => {
+                if (isSuccess) {
+                  setKeyword(e.target.value);
+                }
+              }}
               className="resize-none !border-gray-200 !shadow-none"
             />
           </div>
