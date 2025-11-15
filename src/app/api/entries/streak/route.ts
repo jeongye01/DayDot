@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";
 import { toUTCMidnightISOString } from "@/lib/utils";
 // TODO: 성능 개선 고민 필요
-// FIXME: 연속 기록 버그 있음. 이틀 이상 기록 안해야 연속 일수 초기화 됌
+
 export const GET = withAuth(async (session) => {
   // TODO: 반복 로직 없애기
 
@@ -36,18 +36,25 @@ export const GET = withAuth(async (session) => {
   for (let i = 1; i < uniqueDays.length; i++) {
     const prev = new Date(uniqueDays[i - 1]);
     const curr = new Date(uniqueDays[i]);
-    const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
 
+    // 2. 일수 차이 계산
+    const diffTime = curr.getTime() - prev.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    // 3. 차이가 '정확히 1'인지 확인
     if (diffDays === 1) {
       currentStreak++;
       maxStreak = Math.max(maxStreak, currentStreak);
     } else if (diffDays > 1) {
+      // 하루를 건너뛰었다면 스트릭 리셋
       currentStreak = 1;
     }
   }
   const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setUTCDate(now.getUTCDate() - 1);
+  const todayUtc = new Date(toUTCMidnightISOString(now));
+
+  const yesterdayUtc = new Date(todayUtc);
+  yesterdayUtc.setUTCDate(todayUtc.getUTCDate() - 1);
 
   // ✅ 오늘 기록 여부
   const hasTodayEntry = entries.some(
@@ -60,7 +67,7 @@ export const GET = withAuth(async (session) => {
   const hasYesterdayEntry = entries.some(
     (e) =>
       e.date.toISOString().split("T")[0] ===
-      toUTCMidnightISOString(yesterday).split("T")[0],
+      yesterdayUtc.toISOString().split("T")[0],
   );
 
   // ✅ 오늘 기록이 있으면 유지, 없고 어제 기록도 없으면 끊김

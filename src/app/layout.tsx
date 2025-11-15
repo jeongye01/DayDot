@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { FeedbackButton } from "@/components/daydot/FeedbackButton";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+import { useSession } from "next-auth/react";
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],
@@ -62,18 +63,22 @@ export default async function RootLayout({
         />
 
         {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-L4LNDCVN1B"
-          strategy="afterInteractive"
-        />
-        <Script id="ga-init" strategy="afterInteractive">
-          {`
+        {process.env.NEXT_PUBLIC_ENV === "production" && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-L4LNDCVN1B');
+            gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
           `}
-        </Script>
+            </Script>
+          </>
+        )}
       </head>
       <body className="flex max-h-screen flex-col items-center bg-gray-50 text-gray-900">
         <Providers>
