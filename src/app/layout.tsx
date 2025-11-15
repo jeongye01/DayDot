@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { FeedbackButton } from "@/components/daydot/FeedbackButton";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+import { useSession } from "next-auth/react";
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],

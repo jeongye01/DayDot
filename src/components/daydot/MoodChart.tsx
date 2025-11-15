@@ -19,6 +19,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "../ui/empty";
+import { useSession } from "next-auth/react";
 
 type RGB = [number, number, number];
 
@@ -87,7 +88,7 @@ export const MoodChart = () => {
     { mood: "BAD", count: statData?.stats?.["BAD"] ?? 0, index: 3 },
     { mood: "ANGRY", count: statData?.stats?.["ANGRY"] ?? 0, index: 4 },
   ];
-
+  const { data: session } = useSession();
   return (
     <div className="shadow-test2 relative flex h-50 flex-col items-center justify-center gap-2 overflow-hidden rounded-lg bg-white p-2">
       <div className="![&_*:focus-visible]:outline-none flex h-64 w-full flex-col items-center justify-center outline-none focus:outline-none">
@@ -101,9 +102,10 @@ export const MoodChart = () => {
             }}
           />
         </div>
-        {statData && statData.total === 0 ? (
-          <Empty className="h-full w-full">
-            <EmptyHeader className="flex h-full w-full flex-col">
+
+        {!session || (statData && statData.total === 0) ? (
+          <Empty className="h-full w-fit !p-0">
+            <EmptyHeader className="flex h-full w-full flex-col items-center justify-center">
               <EmptyMedia variant="icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -121,37 +123,97 @@ export const MoodChart = () => {
                 </svg>
               </EmptyMedia>
               <EmptyTitle className="text-primary text-[16px]">
-                이번 달 감정이 비어있어요.
+                {session
+                  ? " 이번 달 감정이 비어있어요."
+                  : "로그인이 필요합니다."}
               </EmptyTitle>
-              <EmptyDescription>
-                오늘 하루는 어땠나요? 기록을 남겨보세요.
-              </EmptyDescription>
+              {session && (
+                <EmptyDescription>
+                  오늘 하루는 어땠나요? 기록을 남겨보세요.
+                </EmptyDescription>
+              )}
             </EmptyHeader>
           </Empty>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={moodData}>
-              <defs>
-                <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={waveColor} stopOpacity={0.6} />
-                  <stop offset="100%" stopColor={waveColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
+          <>
+            {session ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={moodData}>
+                  <defs>
+                    <linearGradient
+                      id="waveGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor={waveColor}
+                        stopOpacity={0.6}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={waveColor}
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
 
-              <XAxis dataKey="index" hide />
-              <YAxis hide />
-              <Tooltip content={<MoodTooltip />} cursor={false} />
-              <Area
-                type="monotone"
-                dataKey="count"
-                stroke={waveColor}
-                strokeWidth={2}
-                fill="url(#waveGradient)"
-                fillOpacity={1}
-                isAnimationActive={true}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                  <XAxis dataKey="index" hide />
+                  <YAxis hide />
+                  <Tooltip content={<MoodTooltip />} cursor={false} />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke={waveColor}
+                    strokeWidth={2}
+                    fill="url(#waveGradient)"
+                    fillOpacity={1}
+                    isAnimationActive={true}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={moodData}>
+                  <defs>
+                    <linearGradient
+                      id="waveGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor={waveColor}
+                        stopOpacity={0.6}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={waveColor}
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+
+                  <XAxis dataKey="index" hide />
+                  <YAxis hide />
+                  <Tooltip content={<MoodTooltip />} cursor={false} />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke={waveColor}
+                    strokeWidth={2}
+                    fill="url(#waveGradient)"
+                    fillOpacity={1}
+                    isAnimationActive={true}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </>
         )}
       </div>
     </div>

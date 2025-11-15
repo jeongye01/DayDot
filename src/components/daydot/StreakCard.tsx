@@ -1,6 +1,7 @@
 import { getHasWrittenToday, getStreak } from "@/lib/queryFns";
 import { queryKeys } from "@/lib/queryKeys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 const getTimeOfDayIcon = () => {
@@ -60,13 +61,21 @@ export const StreakCard = () => {
       });
     }
   }, [todayProgress, queryClient]);
+  const { data: session } = useSession();
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-800">
-          🔥 {streakData?.currentStreak}일 연속 기록 중
-        </p>
+        {session ? (
+          <p className="text-sm font-semibold text-gray-800">
+            🔥 {streakData?.currentStreak}일 연속 기록 중
+          </p>
+        ) : (
+          <p className="text-sm font-semibold text-gray-800">
+            🔥 로그인이 필요합니다.
+          </p>
+        )}
+
         <span className="text-xs text-gray-500">
           하루의 {todayProgress}%쯤 왔어요. {getTimeOfDayIcon()}
         </span>
@@ -81,18 +90,26 @@ export const StreakCard = () => {
       </div>
 
       {/* 상태 문구 */}
-      <p className="mt-1 text-xs text-gray-500">
-        최장 연속 기록 {streakData?.maxStreak}일 • 오늘은{" "}
-        {hasWrittenTodayData && (
-          <>
-            {hasWrittenTodayData.hasWrittenToday ? (
-              <span className="text-primary font-medium">기록 완료</span>
-            ) : (
-              <span className="font-medium text-gray-900">아직 안 했어요</span>
-            )}
-          </>
-        )}
-      </p>
+      {session ? (
+        <p className="mt-1 text-xs text-gray-500">
+          최장 연속 기록 {streakData?.maxStreak}일 • 오늘은{" "}
+          {hasWrittenTodayData && (
+            <>
+              {hasWrittenTodayData.hasWrittenToday ? (
+                <span className="text-primary font-medium">기록 완료</span>
+              ) : (
+                <span className="font-medium text-gray-900">
+                  아직 안 했어요
+                </span>
+              )}
+            </>
+          )}
+        </p>
+      ) : (
+        <p className="mt-1 text-xs text-gray-500">
+          DayDot에서 하루의 기록을 간단하게 남기세요.
+        </p>
+      )}
     </div>
   );
 };

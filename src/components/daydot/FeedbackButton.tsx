@@ -15,8 +15,11 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { PostFeedbackPayload } from "@/types/feedback";
 import { postFeedback } from "@/lib/queryFns";
+import { useSession } from "next-auth/react";
+import clsx from "clsx";
 
 export const FeedbackButton = () => {
+  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<PostFeedbackPayload["rating"] | 0>(0);
   const [feedback, setFeedback] = useState("");
@@ -54,7 +57,10 @@ export const FeedbackButton = () => {
         <DialogTrigger>
           <Button
             size="lg"
-            className="shadow-test2 bg-primary h-7 w-fit rounded-full text-[12px] text-white"
+            className={clsx(
+              "shadow-test2 bg-primary h-7 w-fit rounded-full text-[12px] text-white",
+              !session && "hidden",
+            )}
             asChild
           >
             <div>Feedback</div>

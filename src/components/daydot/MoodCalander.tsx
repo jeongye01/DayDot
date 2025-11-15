@@ -52,6 +52,7 @@ import {
 } from "@/types/entries";
 
 import { toUTCMidnightISOString } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 const MOODS: Record<MOOD, { img: string }> = {
   LOVE: {
@@ -102,6 +103,7 @@ export const getUtcCalendarRange = ({
   };
 };
 export const MoodCalander = () => {
+  const { data: session } = useSession();
   const [month, setMonth] = useState(new Date());
 
   const year = month.getFullYear();
@@ -120,6 +122,10 @@ export const MoodCalander = () => {
     placeholderData: (prev) => prev,
   });
   const handleDayClick = (date: Date, isFuture: boolean) => {
+    if (!session) {
+      toast.info("로그인이 필요합니다.");
+      return;
+    }
     if (isFuture) {
       toast.info("오늘 이후의 날짜입니다.", {
         duration: 1200,
