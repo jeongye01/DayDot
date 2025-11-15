@@ -1,6 +1,6 @@
 import { getHasWrittenToday, getStreak } from "@/lib/queryFns";
 import { queryKeys } from "@/lib/queryKeys";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 const getTimeOfDayIcon = () => {
@@ -45,7 +45,21 @@ export const StreakCard = () => {
     );
     return () => clearInterval(timer);
   }, []);
-
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    // 새벽 00:00 ~ 00:02 사이면 새 날짜로 판단
+    if (todayProgress <= 2) {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.stats(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.today(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.entries.streak(),
+      });
+    }
+  }, [todayProgress, queryClient]);
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       {/* 헤더 */}
