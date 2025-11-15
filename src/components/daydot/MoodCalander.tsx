@@ -305,7 +305,7 @@ const EntryCreateDialog = ({
     });
   };
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent>
       <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>
@@ -322,10 +322,13 @@ const EntryCreateDialog = ({
               onValueChange={(v) => {
                 setSelectedMood(v as MOOD);
               }}
-              className="flex justify-center gap-6"
+              className="flex justify-center gap-3 sm:gap-6"
             >
               {Object.entries(MOODS).map(([mood, { img }]) => (
-                <div key={mood} className="flex w-12 flex-col items-center">
+                <div
+                  key={mood}
+                  className="flex w-full max-w-12 flex-col items-center"
+                >
                   <RadioGroupItem
                     value={mood}
                     id={mood}
